@@ -1,0 +1,9 @@
+{{- $email := promptString "email" -}}
+{{- $name := promptString "name" -}}
+{{- $signkeyid := promptString "signkeyid" -}}
+{{- $iswork := promptString "iswork" -}}
+[data]
+    email = "{{ $email }}"
+    name = "{{ $name }}"
+    signkeyid = "{{ $signkeyid }}"
+    iswork = "{{ $iswork }}"
