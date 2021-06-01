@@ -18,8 +18,8 @@ func withIndex(i *Item, index int) *Item {
 
 func TestOffsetSort(t *testing.T) {
 	offsets := []Offset{
-		Offset{3, 5}, Offset{2, 7},
-		Offset{1, 3}, Offset{2, 9}}
+		{3, 5}, {2, 7},
+		{1, 3}, {2, 9}}
 	sort.Sort(ByOrder(offsets))
 
 	if offsets[0][0] != 1 || offsets[0][1] != 3 ||
@@ -84,13 +84,13 @@ func TestResultRank(t *testing.T) {
 
 	// Sort by relevance
 	item3 := buildResult(
-		withIndex(&Item{}, 2), []Offset{Offset{1, 3}, Offset{5, 7}}, 3)
+		withIndex(&Item{}, 2), []Offset{{1, 3}, {5, 7}}, 3)
 	item4 := buildResult(
-		withIndex(&Item{}, 2), []Offset{Offset{1, 2}, Offset{6, 7}}, 4)
+		withIndex(&Item{}, 2), []Offset{{1, 2}, {6, 7}}, 4)
 	item5 := buildResult(
-		withIndex(&Item{}, 2), []Offset{Offset{1, 3}, Offset{5, 7}}, 5)
+		withIndex(&Item{}, 2), []Offset{{1, 3}, {5, 7}}, 5)
 	item6 := buildResult(
-		withIndex(&Item{}, 2), []Offset{Offset{1, 2}, Offset{6, 7}}, 6)
+		withIndex(&Item{}, 2), []Offset{{1, 2}, {6, 7}}, 6)
 	items = []Result{item1, item2, item3, item4, item5, item6}
 	sort.Sort(ByRelevance(items))
 	if !(items[0] == item6 && items[1] == item5 &&
@@ -109,10 +109,10 @@ func TestColorOffset(t *testing.T) {
 	item := Result{
 		item: &Item{
 			colors: &[]ansiOffset{
-				{[2]int32{0, 20}, ansiState{1, 5, 0}},
-				{[2]int32{22, 27}, ansiState{2, 6, tui.Bold}},
-				{[2]int32{30, 32}, ansiState{3, 7, 0}},
-				{[2]int32{33, 40}, ansiState{4, 8, tui.Bold}}}}}
+				{[2]int32{0, 20}, ansiState{1, 5, 0, -1}},
+				{[2]int32{22, 27}, ansiState{2, 6, tui.Bold, -1}},
+				{[2]int32{30, 32}, ansiState{3, 7, 0, -1}},
+				{[2]int32{33, 40}, ansiState{4, 8, tui.Bold, -1}}}}}
 
 	colBase := tui.NewColorPair(89, 189, tui.AttrUndefined)
 	colMatch := tui.NewColorPair(99, 199, tui.AttrUndefined)

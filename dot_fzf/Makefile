@@ -1,3 +1,4 @@
+SHELL          := bash
 GO             ?= go
 GOOS           ?= $(word 1, $(subst /, " ", $(word 4, $(shell go version))))
 
@@ -26,6 +27,7 @@ $(error Not on git repository; cannot determine $$FZF_REVISION)
 endif
 BUILD_FLAGS    := -a -ldflags "-s -w -X main.version=$(VERSION) -X main.revision=$(REVISION)" -tags "$(TAGS)"
 
+BINARY32       := fzf-$(GOOS)_386
 BINARY64       := fzf-$(GOOS)_amd64
 BINARYARM5     := fzf-$(GOOS)_arm5
 BINARYARM6     := fzf-$(GOOS)_arm6
@@ -39,6 +41,10 @@ ifeq ($(UNAME_M),x86_64)
 	BINARY := $(BINARY64)
 else ifeq ($(UNAME_M),amd64)
 	BINARY := $(BINARY64)
+else ifeq ($(UNAME_M),i686)
+	BINARY := $(BINARY32)
+else ifeq ($(UNAME_M),i386)
+	BINARY := $(BINARY32)
 else ifeq ($(UNAME_M),armv5l)
 	BINARY := $(BINARYARM5)
 else ifeq ($(UNAME_M),armv6l)
@@ -46,6 +52,8 @@ else ifeq ($(UNAME_M),armv6l)
 else ifeq ($(UNAME_M),armv7l)
 	BINARY := $(BINARYARM7)
 else ifeq ($(UNAME_M),armv8l)
+	BINARY := $(BINARYARM8)
+else ifeq ($(UNAME_M),arm64)
 	BINARY := $(BINARYARM8)
 else ifeq ($(UNAME_M),aarch64)
 	BINARY := $(BINARYARM8)
@@ -58,11 +66,15 @@ endif
 all: target/$(BINARY)
 
 test: $(SOURCES)
+	[ -z "$$(gofmt -s -d src)" ] || (gofmt -s -d src; exit 1)
 	SHELL=/bin/sh GOOS= $(GO) test -v -tags "$(TAGS)" \
 				github.com/junegunn/fzf/src \
 				github.com/junegunn/fzf/src/algo \
 				github.com/junegunn/fzf/src/tui \
 				github.com/junegunn/fzf/src/util
+
+bench:
+	cd src && SHELL=/bin/sh GOOS= $(GO) test -v -tags "$(TAGS)" -run=Bench -bench=. -benchmem
 
 install: bin/fzf
 
@@ -107,6 +119,9 @@ endif
 clean:
 	$(RM) -r dist target
 
+target/$(BINARY32): $(SOURCES)
+	GOARCH=386 $(GO) build $(BUILD_FLAGS) -o $@
+
 target/$(BINARY64): $(SOURCES)
 	GOARCH=amd64 $(GO) build $(BUILD_FLAGS) -o $@
 
@@ -141,4 +156,4 @@ update:
 	$(GO) get -u
 	$(GO) mod tidy
 
-.PHONY: all build release test install clean docker docker-test update
+.PHONY: all build release test bench install clean docker docker-test update

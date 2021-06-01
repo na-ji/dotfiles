@@ -1,22 +1,22 @@
-fzf.txt	fzf	Last change: October 18 2020
+fzf.txt	fzf	Last change: May 19 2021
 FZF - TABLE OF CONTENTS                                            *fzf* *fzf-toc*
 ==============================================================================
 
-  FZF Vim integration
-    Installation
-    Summary
-    :FZF[!]
-      Configuration
-        Examples
-          Explanation of g:fzf_colors
-    fzf#run
-    fzf#wrap
-      Global options supported by fzf#wrap
-    Tips
-      fzf inside terminal buffer
-        Starting fzf in a popup window
-        Hide statusline
-    License
+  FZF Vim integration                       |fzf-vim-integration|
+    Installation                            |fzf-installation|
+    Summary                                 |fzf-summary|
+    :FZF[!]                                 |:FZF|
+      Configuration                         |fzf-configuration|
+        Examples                            |fzf-examples|
+          Explanation of g:fzf_colors       |fzf-explanation-of-gfzfcolors|
+    fzf#run                                 |fzf#run|
+    fzf#wrap                                |fzf#wrap|
+      Global options supported by fzf#wrap  |fzf-global-options-supported-by-fzf#wrap|
+    Tips                                    |fzf-tips|
+      fzf inside terminal buffer            |fzf-inside-terminal-buffer|
+      Starting fzf in a popup window        |fzf-starting-fzf-in-a-popup-window|
+      Hide statusline                       |fzf-hide-statusline|
+    License                                 |fzf-license|
 
 FZF VIM INTEGRATION                                        *fzf-vim-integration*
 ==============================================================================
@@ -155,8 +155,14 @@ Examples~
       \ 'ctrl-v': 'vsplit' }
 
     " Default fzf layout
-    " - Popup window
+    " - Popup window (center of the screen)
     let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
+
+    " - Popup window (center of the current window)
+    let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6, 'relative': v:true } }
+
+    " - Popup window (anchored to the bottom of the current window)
+    let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6, 'relative': v:true, 'yoffset': 1.0 } }
 
     " - down / up / left / right
     let g:fzf_layout = { 'down': '40%' }
@@ -200,21 +206,25 @@ list:
 <
  - `element` is an fzf element to apply a color to:
 
- ----------------------+------------------------------------------------------
- Element               | Description                                          ~
- ----------------------+------------------------------------------------------
-  `fg`   /  `bg`   /  `hl`   | Item (foreground / background / highlight)
-  `fg+`  /  `bg+`  /  `hl+`  | Current item (foreground / background / highlight)
-  `hl`   /  `hl+`          | Highlighted substrings (normal / current)
-  `gutter`               | Background of the gutter on the left
-  `pointer`              | Pointer to the current line ( `>` )
-  `marker`               | Multi-select marker ( `>` )
-  `border`               | Border around the window ( `--border`  and  `--preview` )
-  `header`               | Header ( `--header`  or  `--header-lines` )
-  `info`                 | Info line (match counters)
-  `spinner`              | Streaming input indicator
-  `prompt`               | Prompt before query ( `> ` )
- ----------------------+------------------------------------------------------
+ ----------------------------+------------------------------------------------------
+ Element                     | Description                                          ~
+ ----------------------------+------------------------------------------------------
+  `fg`   /  `bg`   /  `hl`         | Item (foreground / background / highlight)
+  `fg+`  /  `bg+`  /  `hl+`        | Current item (foreground / background / highlight)
+  `preview-fg`  /  `preview-bg`  | Preview window text and background
+  `hl`   /  `hl+`                | Highlighted substrings (normal / current)
+  `gutter`                     | Background of the gutter on the left
+  `pointer`                    | Pointer to the current line ( `>` )
+  `marker`                     | Multi-select marker ( `>` )
+  `border`                     | Border around the window ( `--border`  and  `--preview` )
+  `header`                     | Header ( `--header`  or  `--header-lines` )
+  `info`                       | Info line (match counters)
+  `spinner`                    | Streaming input indicator
+  `query`                      | Query string
+  `disabled`                   | Query string when search is disabled
+  `prompt`                     | Prompt before query ( `> ` )
+  `pointer`                    | Pointer to the current line ( `>` )
+ ----------------------------+------------------------------------------------------
  - `component` specifies the component (`fg` / `bg`) from which to extract the
    color when considering each of the following highlight groups
  - `group1 [, group2, ...]` is a list of highlight groups that are searched (in
@@ -314,9 +324,9 @@ following options are allowed:
  - Optional:
    - `yoffset` [float default 0.5 range [0 ~ 1]]
    - `xoffset` [float default 0.5 range [0 ~ 1]]
-   - `highlight` [string default `'Comment'`]: Highlight group for border
+   - `relative` [boolean default v:false]
    - `border` [string default `rounded`]: Border style
-     - `rounded` / `sharp` / `horizontal` / `vertical` / `top` / `bottom` / `left` / `right`
+     - `rounded` / `sharp` / `horizontal` / `vertical` / `top` / `bottom` / `left` / `right` / `no[ne]`
 
 
 FZF#WRAP
@@ -369,7 +379,7 @@ last `fullscreen` argument of `fzf#wrap` (see :help <bang>).
 Our `:LS` command will be much more useful if we can pass a directory argument
 to it, so that something like `:LS /tmp` is possible.
 >
-    command! -bang -complete=dir -nargs=* LS
+    command! -bang -complete=dir -nargs=? LS
         \ call fzf#run(fzf#wrap({'source': 'ls', 'dir': <q-args>}, <bang>0))
 <
 Lastly, if you have enabled `g:fzf_history_dir`, you might want to assign a
@@ -377,7 +387,7 @@ unique name to our command and pass it as the first argument to `fzf#wrap`.
 >
     " The query history for this command will be stored as 'ls' inside g:fzf_history_dir.
     " The name is ignored if g:fzf_history_dir is not defined.
-    command! -bang -complete=dir -nargs=* LS
+    command! -bang -complete=dir -nargs=? LS
         \ call fzf#run(fzf#wrap('ls', {'source': 'ls', 'dir': <q-args>}, <bang>0))
 <
 
@@ -409,8 +419,46 @@ The latest versions of Vim and Neovim include builtin terminal emulator
  - On Terminal Vim with a non-default layout
    - `call fzf#run({'left': '30%'})` or `let g:fzf_layout = {'left': '30%'}`
 
+On the latest versions of Vim and Neovim, fzf will start in a terminal buffer.
+If you find the default ANSI colors to be different, consider configuring the
+colors using `g:terminal_ansi_colors` in regular Vim or `g:terminal_color_x`
+in Neovim.
 
-Starting fzf in a popup window~
+                   *g:terminal_color_15* *g:terminal_color_14* *g:terminal_color_13*
+*g:terminal_color_12* *g:terminal_color_11* *g:terminal_color_10* *g:terminal_color_9*
+   *g:terminal_color_8* *g:terminal_color_7* *g:terminal_color_6* *g:terminal_color_5*
+   *g:terminal_color_4* *g:terminal_color_3* *g:terminal_color_2* *g:terminal_color_1*
+                                                            *g:terminal_color_0*
+>
+    " Terminal colors for seoul256 color scheme
+    if has('nvim')
+      let g:terminal_color_0 = '#4e4e4e'
+      let g:terminal_color_1 = '#d68787'
+      let g:terminal_color_2 = '#5f865f'
+      let g:terminal_color_3 = '#d8af5f'
+      let g:terminal_color_4 = '#85add4'
+      let g:terminal_color_5 = '#d7afaf'
+      let g:terminal_color_6 = '#87afaf'
+      let g:terminal_color_7 = '#d0d0d0'
+      let g:terminal_color_8 = '#626262'
+      let g:terminal_color_9 = '#d75f87'
+      let g:terminal_color_10 = '#87af87'
+      let g:terminal_color_11 = '#ffd787'
+      let g:terminal_color_12 = '#add4fb'
+      let g:terminal_color_13 = '#ffafaf'
+      let g:terminal_color_14 = '#87d7d7'
+      let g:terminal_color_15 = '#e4e4e4'
+    else
+      let g:terminal_ansi_colors = [
+        \ '#4e4e4e', '#d68787', '#5f865f', '#d8af5f',
+        \ '#85add4', '#d7afaf', '#87afaf', '#d0d0d0',
+        \ '#626262', '#d75f87', '#87af87', '#ffd787',
+        \ '#add4fb', '#ffafaf', '#87d7d7', '#e4e4e4'
+      \ ]
+    endif
+<
+
+< Starting fzf in a popup window >____________________________________________~
                                             *fzf-starting-fzf-in-a-popup-window*
 >
     " Required:
@@ -420,7 +468,7 @@ Starting fzf in a popup window~
     " Optional:
     " - xoffset [float default 0.5 range [0 ~ 1]]
     " - yoffset [float default 0.5 range [0 ~ 1]]
-    " - highlight [string default 'Comment']: Highlight group for border
+    " - relative [boolean default v:false]
     " - border [string default 'rounded']: Border style
     "   - 'rounded' / 'sharp' / 'horizontal' / 'vertical' / 'top' / 'bottom' / 'left' / 'right'
     let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
@@ -436,21 +484,21 @@ or above) by putting fzf-tmux options in `tmux` key.
     endif
 <
 
-Hide statusline~
+< Hide statusline >___________________________________________________________~
                                                            *fzf-hide-statusline*
 
 When fzf starts in a terminal buffer, the file type of the buffer is set to
 `fzf`. So you can set up `FileType fzf` autocmd to customize the settings of
 the window.
 
-For example, if you use a non-popup layout (e.g. `{'down': '40%'}`) on Neovim,
-you might want to temporarily disable the statusline for a cleaner look.
+For example, if you open fzf on the bottom on the screen (e.g. `{'down':
+'40%'}`), you might want to temporarily disable the statusline for a cleaner
+look.
 >
-    if has('nvim') && !exists('g:fzf_layout')
-      autocmd! FileType fzf
-      autocmd  FileType fzf set laststatus=0 noshowmode noruler
-        \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
-    endif
+    let g:fzf_layout = { 'down': '30%' }
+    autocmd! FileType fzf
+    autocmd  FileType fzf set laststatus=0 noshowmode noruler
+      \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
 <
 
 LICENSE                                                            *fzf-license*
@@ -458,7 +506,7 @@ LICENSE                                                            *fzf-license*
 
 The MIT License (MIT)
 
-Copyright (c) 2013-2020 Junegunn Choi
+Copyright (c) 2013-2021 Junegunn Choi
 
 ==============================================================================
 vim:tw=78:sw=2:ts=2:ft=help:norl:nowrap:
