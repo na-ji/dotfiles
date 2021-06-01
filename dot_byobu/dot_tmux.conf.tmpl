@@ -8,7 +8,9 @@ set -g @tpm_plugins '          \
 '
 
 set -g @continuum-restore 'on'
+{{ if eq .chezmoi.os "darwin" -}}
 set-option -g default-command "reattach-to-user-namespace -l $SHELL"
+{{ end -}}
 
 set -ga terminal-overrides ",xterm-256color:Tc"
 

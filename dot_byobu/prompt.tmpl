@@ -1,1 +1,5 @@
+{{ if eq .chezmoi.os "linux" -}}
+[ -r /usr/share/byobu/profiles/bashrc ] && . /usr/share/byobu/profiles/bashrc  #byobu-prompt#
+{{ else if eq .chezmoi.os "darwin" -}}
 [ -r /usr/local/Cellar/byobu/5.129/share/byobu/profiles/bashrc ] && . /usr/local/Cellar/byobu/5.129/share/byobu/profiles/bashrc  #byobu-prompt#
+{{ end -}}
