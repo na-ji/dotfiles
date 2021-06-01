@@ -5,11 +5,11 @@ ensure_tpm_path_exists() {
 fail_helper() {
 	local message="$1"
 	echo "$message" >&2
-	FAIL="{{ .iswork }}"
+	FAIL="true"
 }
 
 exit_value_helper() {
-	if [ "$FAIL" == "{{ .iswork }}" ]; then
+	if [ "$FAIL" == "true" ]; then
 		exit 1
 	else
 		exit 0

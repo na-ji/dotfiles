@@ -10,7 +10,7 @@ template() {
 	local is_fullscreen="$2"
 
 	local fullscreen_tag=""
-	if [ "$is_fullscreen" == "{{ .iswork }}" ]; then
+	if [ "$is_fullscreen" == "true" ]; then
 		# newline and spacing so tag is aligned with other tags in template
 		fullscreen_tag=$'\n        <string>fullscreen</string>'
 	fi
@@ -28,7 +28,7 @@ template() {
 	        <string>${tmux_start_script}</string>$fullscreen_tag
 	    </array>
 	    <key>RunAtLoad</key>
-	    <{{ .iswork }}/>
+	    <true/>
 	</dict>
 	</plist>
 	EOF
@@ -48,7 +48,7 @@ get_iterm_or_teminal_option_value() {
 get_fullscreen_option_value() {
 	local options="$1"
 	if [[ "$options" =~ "fullscreen" ]]; then
-		echo "{{ .iswork }}"
+		echo "true"
 	else
 		echo "false"
 	fi

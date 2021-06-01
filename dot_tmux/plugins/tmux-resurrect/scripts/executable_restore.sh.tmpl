@@ -60,20 +60,20 @@ is_pane_registered_as_existing() {
 	[[ "$EXISTING_PANES_VAR" =~ "$pane_custom_id" ]]
 }
 
-restore_from_scratch_{{ .iswork }}() {
-	RESTORING_FROM_SCRATCH="{{ .iswork }}"
+restore_from_scratch_true() {
+	RESTORING_FROM_SCRATCH="true"
 }
 
 is_restoring_from_scratch() {
-	[ "$RESTORING_FROM_SCRATCH" == "{{ .iswork }}" ]
+	[ "$RESTORING_FROM_SCRATCH" == "true" ]
 }
 
-restore_pane_contents_{{ .iswork }}() {
-	RESTORE_PANE_CONTENTS="{{ .iswork }}"
+restore_pane_contents_true() {
+	RESTORE_PANE_CONTENTS="true"
 }
 
 is_restoring_pane_contents() {
-	[ "$RESTORE_PANE_CONTENTS" == "{{ .iswork }}" ]
+	[ "$RESTORE_PANE_CONTENTS" == "true" ]
 }
 
 window_exists() {
@@ -240,14 +240,14 @@ detect_if_restoring_from_scratch() {
 	fi
 	local total_number_of_panes="$(tmux list-panes -a | wc -l | sed 's/ //g')"
 	if [ "$total_number_of_panes" -eq 1 ]; then
-		restore_from_scratch_{{ .iswork }}
+		restore_from_scratch_true
 	fi
 }
 
 detect_if_restoring_pane_contents() {
 	if capture_pane_contents_option_on; then
 		cache_tmux_default_command
-		restore_pane_contents_{{ .iswork }}
+		restore_pane_contents_true
 	fi
 }
 

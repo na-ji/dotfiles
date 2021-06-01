@@ -106,7 +106,7 @@ project root. To setup continuous integration, just add/enable the project on
   environment. That's an internal test runner meant to be executed in an
   isolated environment like `vagrant` or `travis`.<br/>
   Use `./run_tests` script.
-- You can use `KEEP_RUNNING={{ .iswork }} ./run_tests` for faster test running cycle.
+- You can use `KEEP_RUNNING=true ./run_tests` for faster test running cycle.
   If this case `Vagrant` will keep running even after the tests are done.
 - You can use `VAGRANT_CWD=lib/tmux-test/ vagrant ssh ubuntu` for ssh login to
   `Vagrant`.

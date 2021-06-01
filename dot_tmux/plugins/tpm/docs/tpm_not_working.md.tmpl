@@ -68,7 +68,7 @@ Related: [issue #48](https://github.com/tmux-plugins/tpm/issues/48)
 Related: [issue #81](https://github.com/tmux-plugins/tpm/issues/81)
 
 This issue is most likely caused by Windows line endings. For example, if you
-have git's `core.autocrlf` option set to `{{ .iswork }}`, git will automatically convert
+have git's `core.autocrlf` option set to `true`, git will automatically convert
 all the files to Windows line endings which might cause a problem.
 
 The solution is to convert all line ending to Unix newline characters. This
