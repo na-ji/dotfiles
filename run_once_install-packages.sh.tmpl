@@ -21,7 +21,7 @@ curl -fsSL https://starship.rs/install.sh | FORCE=1 bash
 # https://github.com/pyenv/pyenv
 curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 
-{{ if stat (joinPath .chezmoi.homedir ".pyenv") }}
+{{ if stat (joinPath .chezmoi.homeDir ".pyenv") }}
 # https://github.com/nvbn/thefuck
 pip3 install thefuck
 {{ end }}
