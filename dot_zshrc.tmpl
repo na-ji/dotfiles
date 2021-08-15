@@ -98,8 +98,8 @@ alias lla="exa -la"
 
 # GO
 export GOPATH="${HOME}/.go"
-{{- if eq .chezmoi.os "linux" -}}
-export GOROOT=/usr/bin/go
+{{ if eq .chezmoi.os "linux" -}}
+export GOROOT=/usr/local/go
 {{- else if eq .chezmoi.os "darwin" -}}
 export GOROOT="$(brew --prefix golang)/libexec"
 {{- end }}
