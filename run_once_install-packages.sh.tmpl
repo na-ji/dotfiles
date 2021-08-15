@@ -1,7 +1,10 @@
 #!/bin/sh
 {{ if eq .chezmoi.os "linux" -}}
 
-sudo apt install zsh ripgrep zoxide bat exa xclip golang tmux byobu
+INSTALL_PKGS="zsh ripgrep zoxide bat exa xclip golang tmux byobu"
+for i in $INSTALL_PKGS; do
+  sudo apt-get install -y $i
+done
 
 mkdir -p ~/.local/bin
 ln -s /usr/bin/batcat ~/.local/bin/bat
