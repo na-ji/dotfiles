@@ -39,6 +39,7 @@
     packedWindowSize = 500m
     autocrlf = input
     pager = delta
+    excludesfile = /Users/naji/.gitignore_global
 [interactive]
     diffFilter = delta
 [push]
@@ -57,9 +58,17 @@
     ff = false
 [checkout]
     defaultRemote=origin
+{{- if ne .signkeyid "" }}
 [commit]
     gpgsign = true
+{{ end -}}
 [diff "sopsdiffer"]
     textconv = sops -d
 [pull]
     rebase = true
+{{- if ne .signkeyid "" }}
+{{ if eq .chezmoi.os "darwin" -}}
+[gpg]
+    program = /opt/homebrew/bin/gpg
+{{ end -}}
+{{ end -}}
