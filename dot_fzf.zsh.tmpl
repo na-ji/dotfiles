@@ -1,13 +1,26 @@
 # Setup fzf
 # ---------
+{{ if eq .chezmoi.os "linux" -}}
 if [[ ! "$PATH" == */usr/local/opt/fzf/bin* ]]; then
   export PATH="${PATH:+${PATH}:}/usr/local/opt/fzf/bin"
+{{- else if eq .chezmoi.os "darwin" -}}
+if [[ ! "$PATH" == */Users/naji/.fzf/bin* ]]; then
+  export PATH="${PATH:+${PATH}:}/Users/naji/.fzf/bin"
+{{- end }}
 fi
 
 # Auto-completion
 # ---------------
+{{ if eq .chezmoi.os "linux" -}}
 [[ $- == *i* ]] && source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
+{{- else if eq .chezmoi.os "darwin" -}}
+[[ $- == *i* ]] && source "/Users/naji/.fzf/shell/completion.zsh" 2> /dev/null
+{{- end }}
 
 # Key bindings
 # ------------
+{{ if eq .chezmoi.os "linux" -}}
 source "/usr/local/opt/fzf/shell/key-bindings.zsh"
+{{- else if eq .chezmoi.os "darwin" -}}
+source "/Users/naji/.fzf/shell/key-bindings.zsh"
+{{- end }}
