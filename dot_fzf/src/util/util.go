@@ -26,12 +26,29 @@ func RunesWidth(runes []rune, prefixWidth int, tabstop int, limit int) (int, int
 			w = runewidth.StringWidth(s) + strings.Count(s, "\n")
 		}
 		width += w
-		if limit > 0 && width > limit {
+		if width > limit {
 			return width, idx
 		}
 		idx += len(rs)
 	}
 	return width, -1
+}
+
+// Truncate returns the truncated runes and its width
+func Truncate(input string, limit int) ([]rune, int) {
+	runes := []rune{}
+	width := 0
+	gr := uniseg.NewGraphemes(input)
+	for gr.Next() {
+		rs := gr.Runes()
+		w := runewidth.StringWidth(string(rs))
+		if width+w > limit {
+			return runes, width
+		}
+		width += w
+		runes = append(runes, rs...)
+	}
+	return runes, width
 }
 
 // Max returns the largest integer
@@ -117,9 +134,14 @@ func DurWithin(
 	return val
 }
 
-// IsTty returns true is stdin is a terminal
+// IsTty returns true if stdin is a terminal
 func IsTty() bool {
 	return isatty.IsTerminal(os.Stdin.Fd())
+}
+
+// ToTty returns true if stdout is a terminal
+func ToTty() bool {
+	return isatty.IsTerminal(os.Stdout.Fd())
 }
 
 // Once returns a function that returns the specified boolean value only once

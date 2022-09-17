@@ -34,6 +34,8 @@ BINARYARM6     := fzf-$(GOOS)_arm6
 BINARYARM7     := fzf-$(GOOS)_arm7
 BINARYARM8     := fzf-$(GOOS)_arm8
 BINARYPPC64LE  := fzf-$(GOOS)_ppc64le
+BINARYRISCV64  := fzf-$(GOOS)_riscv64
+BINARYLOONG64  := fzf-$(GOOS)_loong64
 
 # https://en.wikipedia.org/wiki/Uname
 UNAME_M := $(shell uname -m)
@@ -59,6 +61,10 @@ else ifeq ($(UNAME_M),aarch64)
 	BINARY := $(BINARYARM8)
 else ifeq ($(UNAME_M),ppc64le)
 	BINARY := $(BINARYPPC64LE)
+else ifeq ($(UNAME_M),riscv64)
+	BINARY := $(BINARYRISCV64)
+else ifeq ($(UNAME_M),loongarch64)
+	BINARY := $(BINARYLOONG64)
 else
 $(error Build on $(UNAME_M) is not supported, yet.)
 endif
@@ -99,6 +105,7 @@ endif
 	grep -qF $(VERSION) install.ps1
 
 	# Make release note out of CHANGELOG.md
+	mkdir -p tmp
 	sed -n '/^$(VERSION_REGEX)$$/,/^[0-9]/p' CHANGELOG.md | tail -r | \
 		sed '1,/^ *$$/d' | tail -r | sed 1,2d | tee tmp/release-note
 
@@ -140,6 +147,12 @@ target/$(BINARYARM8): $(SOURCES)
 
 target/$(BINARYPPC64LE): $(SOURCES)
 	GOARCH=ppc64le $(GO) build $(BUILD_FLAGS) -o $@
+
+target/$(BINARYRISCV64): $(SOURCES)
+	GOARCH=riscv64 $(GO) build $(BUILD_FLAGS) -o $@
+
+target/$(BINARYLOONG64): $(SOURCES)
+	GOARCH=loong64 $(GO) build $(BUILD_FLAGS) -o $@
 
 bin/fzf: target/$(BINARY) | bin
 	cp -f target/$(BINARY) bin/fzf

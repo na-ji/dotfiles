@@ -1,7 +1,7 @@
 Advanced fzf examples
 ======================
 
-*(Last update: 2021/05/22)*
+*(Last update: 2022/08/25)*
 
 <!-- vim-markdown-toc GFM -->
 
@@ -17,6 +17,7 @@ Advanced fzf examples
   * [Using fzf as the secondary filter](#using-fzf-as-the-secondary-filter)
   * [Using fzf as interative Ripgrep launcher](#using-fzf-as-interative-ripgrep-launcher)
   * [Switching to fzf-only search mode](#switching-to-fzf-only-search-mode)
+  * [Switching between Ripgrep mode and fzf mode](#switching-between-ripgrep-mode-and-fzf-mode)
 * [Log tailing](#log-tailing)
 * [Key bindings for git objects](#key-bindings-for-git-objects)
   * [Files listed in `git status`](#files-listed-in-git-status)
@@ -149,7 +150,7 @@ fzf-tmux -p 80%,60%
 
 > You might also want to check out my tmux plugins which support this popup
 > window layout.
-> 
+>
 > - https://github.com/junegunn/tmux-fzf-url
 > - https://github.com/junegunn/tmux-fzf-maccy
 
@@ -190,7 +191,7 @@ list without restarting fzf.
 
 ### Toggling between data sources
 
-You're not limiited to just one reload binding. Set up multiple bindings so
+You're not limited to just one reload binding. Set up multiple bindings so
 you can switch between data sources.
 
 ```sh
@@ -349,7 +350,7 @@ IFS=: read -ra selected < <(
   fzf can kill the initial Ripgrep process it starts with the initial query.
   Otherwise, the initial Ripgrep process will keep consuming system resources
   even after `reload` is triggered.
-- Filtering is no longer a responsibitiliy of fzf; hence `--disabled`
+- Filtering is no longer a responsibility of fzf; hence `--disabled`
 - `{q}` in the reload command evaluates to the query string on fzf prompt.
 - `sleep 0.1` in the reload command is for "debouncing". This small delay will
   reduce the number of intermediate Ripgrep processes while we're typing in
@@ -405,6 +406,40 @@ IFS=: read -ra selected < <(
 - We reverted `--color` option for customizing how the matching chunks are
   displayed in the second phase
 
+### Switching between Ripgrep mode and fzf mode
+
+*(Requires fzf 0.30.0 or above)*
+
+fzf 0.30.0 added `rebind` action so we can "rebind" the bindings that were
+previously "unbound" via `unbind`.
+
+This is an improved version of the previous example that allows us to switch
+between Ripgrep launcher mode and fzf-only filtering mode via CTRL-R and
+CTRL-F.
+
+```sh
+#!/usr/bin/env bash
+
+# Switch between Ripgrep launcher mode (CTRL-R) and fzf filtering mode (CTRL-F)
+RG_PREFIX="rg --column --line-number --no-heading --color=always --smart-case "
+INITIAL_QUERY="${*:-}"
+IFS=: read -ra selected < <(
+  FZF_DEFAULT_COMMAND="$RG_PREFIX $(printf %q "$INITIAL_QUERY")" \
+  fzf --ansi \
+      --color "hl:-1:underline,hl+:-1:underline:reverse" \
+      --disabled --query "$INITIAL_QUERY" \
+      --bind "change:reload:sleep 0.1; $RG_PREFIX {q} || true" \
+      --bind "ctrl-f:unbind(change,ctrl-f)+change-prompt(2. fzf> )+enable-search+clear-query+rebind(ctrl-r)" \
+      --bind "ctrl-r:unbind(ctrl-r)+change-prompt(1. ripgrep> )+disable-search+reload($RG_PREFIX {q} || true)+rebind(change,ctrl-f)" \
+      --prompt '1. Ripgrep> ' \
+      --delimiter : \
+      --header '╱ CTRL-R (Ripgrep mode) ╱ CTRL-F (fzf mode) ╱' \
+      --preview 'bat --color=always {1} --highlight-line {2}' \
+      --preview-window 'up,60%,border-bottom,+{2}+3/3,~3'
+)
+[ -n "${selected[0]}" ] && vim "${selected[0]}" "+${selected[1]}"
+```
+
 Log tailing
 -----------
 
@@ -429,37 +464,49 @@ Admittedly, that was a silly example. Here's a practical one for browsing
 Kubernetes pods.
 
 ```bash
-#!/usr/bin/env bash
-
-read -ra tokens < <(
-  kubectl get pods --all-namespaces |
-    fzf --info=inline --layout=reverse --header-lines=1 --border \
+pods() {
+  FZF_DEFAULT_COMMAND="kubectl get pods --all-namespaces" \
+    fzf --info=inline --layout=reverse --header-lines=1 \
         --prompt "$(kubectl config current-context | sed 's/-context$//')> " \
-        --header $'Press CTRL-O to open log in editor\n\n' \
-        --bind ctrl-/:toggle-preview \
-        --bind 'ctrl-o:execute:${EDITOR:-vim} <(kubectl logs --namespace {1} {2}) > /dev/tty' \
-        --preview-window up,follow \
-        --preview 'kubectl logs --follow --tail=100000 --namespace {1} {2}' "$@"
-)
-[ ${#tokens} -gt 1 ] &&
-  kubectl exec -it --namespace "${tokens[0]}" "${tokens[1]}" -- bash
+        --header $'╱ Enter (kubectl exec) ╱ CTRL-O (open log in editor) ╱ CTRL-R (reload) ╱\n\n' \
+        --bind 'ctrl-/:change-preview-window(80%,border-bottom|hidden|)' \
+        --bind 'enter:execute:kubectl exec -it --namespace {1} {2} -- bash > /dev/tty' \
+        --bind 'ctrl-o:execute:${EDITOR:-vim} <(kubectl logs --all-containers --namespace {1} {2}) > /dev/tty' \
+        --bind 'ctrl-r:reload:$FZF_DEFAULT_COMMAND' \
+        --preview-window up:follow \
+        --preview 'kubectl logs --follow --all-containers --tail=10000 --namespace {1} {2}' "$@"
+}
 ```
 
 ![image](https://user-images.githubusercontent.com/700826/113473547-1d7a4880-94a5-11eb-98ef-9aa6f0ed215a.png)
 
 - The preview window will *"log tail"* the pod
     - Holding on to a large amount of log will consume a lot of memory. So we
-      limited the initial log amount with `--tail=100000`.
-- With `execute` binding, you can press CTRL-O to open the log in your editor
-  without leaving fzf
-- Select a pod (with an enter key) to `kubectl exec` into it
+      limited the initial log amount with `--tail=10000`.
+- `execute` bindings allow you to run any command without leaving fzf
+    - Press enter key on a pod to `kubectl exec` into it
+    - Press CTRL-O to open the log in your editor
+- Press CTRL-R to reload the pod list
+- Press CTRL-/ repeatedly to to rotate through a different sets of preview
+  window options
+    1. `80%,border-bottom`
+    1. `hidden`
+    1. Empty string after `|` translates to the default options from `--preview-window`
 
 Key bindings for git objects
 ----------------------------
 
-I have [blogged](https://junegunn.kr/2016/07/fzf-git) about my fzf+git key
-bindings a few years ago. I'm going to show them here again, because they are
-seriously useful.
+Oftentimes, you want to put the identifiers of various Git object to the
+command-line. For example, it is common to write commands like these:
+
+```sh
+git checkout [SOME_COMMIT_HASH or BRANCH or TAG]
+git diff [SOME_COMMIT_HASH or BRANCH or TAG] [SOME_COMMIT_HASH or BRANCH or TAG]
+```
+
+[fzf-git.sh](https://github.com/junegunn/fzf-git.sh) project defines a set of
+fzf-based key bindings for Git objects. I strongly recommend that you check
+them out because they are seriously useful.
 
 ### Files listed in `git status`
 
@@ -478,9 +525,6 @@ seriously useful.
 <kbd>CTRL-G</kbd><kbd>CTRL-H</kbd>
 
 ![image](https://user-images.githubusercontent.com/700826/113473765-91692080-94a6-11eb-8d38-ed4d41f27ac1.png)
-
-
-The full source code can be found [here](https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236).
 
 Color themes
 ------------

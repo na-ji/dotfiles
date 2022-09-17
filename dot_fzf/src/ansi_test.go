@@ -1,7 +1,6 @@
 package fzf
 
 import (
-	"fmt"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -16,12 +15,14 @@ import (
 // testing nextAnsiEscapeSequence().
 //
 // References:
-// 	- https://github.com/gnachman/iTerm2
-// 	- http://ascii-table.com/ansi-escape-sequences.php
-// 	- http://ascii-table.com/ansi-escape-sequences-vt-100.php
-// 	- http://tldp.org/HOWTO/Bash-Prompt-HOWTO/x405.html
-// 	- https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
-var ansiRegexRefence = regexp.MustCompile("(?:\x1b[\\[()][0-9;]*[a-zA-Z@]|\x1b][0-9];[[:print:]]+(?:\x1b\\\\|\x07)|\x1b.|[\x0e\x0f]|.\x08)")
+//   - https://github.com/gnachman/iTerm2
+//   - https://web.archive.org/web/20090204053813/http://ascii-table.com/ansi-escape-sequences.php
+//     (archived from http://ascii-table.com/ansi-escape-sequences.php)
+//   - https://web.archive.org/web/20090227051140/http://ascii-table.com/ansi-escape-sequences-vt-100.php
+//     (archived from http://ascii-table.com/ansi-escape-sequences-vt-100.php)
+//   - http://tldp.org/HOWTO/Bash-Prompt-HOWTO/x405.html
+//   - https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+var ansiRegexReference = regexp.MustCompile("(?:\x1b[\\[()][0-9;:]*[a-zA-Z@]|\x1b][0-9][;:][[:print:]]+(?:\x1b\\\\|\x07)|\x1b.|[\x0e\x0f]|.\x08)")
 
 func testParserReference(t testing.TB, str string) {
 	t.Helper()
@@ -36,7 +37,7 @@ func testParserReference(t testing.TB, str string) {
 	s := str
 	for i := 0; ; i++ {
 		got := toSlice(nextAnsiEscapeSequence(s))
-		exp := ansiRegexRefence.FindStringIndex(s)
+		exp := ansiRegexReference.FindStringIndex(s)
 
 		equal := len(got) == len(exp)
 		if equal {
@@ -207,7 +208,7 @@ func TestExtractColor(t *testing.T) {
 		if output != "hello world" {
 			t.Errorf("Invalid output: %s %v", output, []rune(output))
 		}
-		fmt.Println(src, ansiOffsets, clean)
+		t.Log(src, ansiOffsets, clean)
 		assertion(ansiOffsets, state)
 	}
 
@@ -357,6 +358,7 @@ func TestAnsiCodeStringConversion(t *testing.T) {
 	assert("\x1b[31m", &ansiState{fg: 4, bg: 4, lbg: -1}, "\x1b[31;44m")
 	assert("\x1b[1;2;31m", &ansiState{fg: 2, bg: -1, attr: tui.Reverse, lbg: -1}, "\x1b[1;2;7;31;49m")
 	assert("\x1b[38;5;100;48;5;200m", nil, "\x1b[38;5;100;48;5;200m")
+	assert("\x1b[38:5:100:48:5:200m", nil, "\x1b[38;5;100;48;5;200m")
 	assert("\x1b[48;5;100;38;5;200m", nil, "\x1b[38;5;200;48;5;100m")
 	assert("\x1b[48;5;100;38;2;10;20;30;1m", nil, "\x1b[1;38;2;10;20;30;48;5;100m")
 	assert("\x1b[48;5;100;38;2;10;20;30;7m",
@@ -376,7 +378,7 @@ func TestParseAnsiCode(t *testing.T) {
 		{"-2", "", -1},
 	}
 	for _, x := range tests {
-		n, s := parseAnsiCode(x.In)
+		n, _, s := parseAnsiCode(x.In, 0)
 		if n != x.N || s != x.Exp {
 			t.Fatalf("%q: got: (%d %q) want: (%d %q)", x.In, n, s, x.N, x.Exp)
 		}
@@ -384,9 +386,9 @@ func TestParseAnsiCode(t *testing.T) {
 }
 
 // kernel/bpf/preload/iterators/README
-const ansiBenchmarkString = "\x1b[38;5;81m\x1b[01;31m\x1b[Kkernel/\x1b[0m\x1b[38;5;81mbpf/" +
-	"\x1b[0m\x1b[38;5;81mpreload/\x1b[0m\x1b[38;5;81miterators/" +
-	"\x1b[0m\x1b[38;5;149mMakefile\x1b[m\x1b[K\x1b[0m"
+const ansiBenchmarkString = "\x1b[38;5;81m\x1b[01;31m\x1b[Kkernel/\x1b[0m\x1b[38:5:81mbpf/" +
+	"\x1b[0m\x1b[38:5:81mpreload/\x1b[0m\x1b[38;5;81miterators/" +
+	"\x1b[0m\x1b[38:5:149mMakefile\x1b[m\x1b[K\x1b[0m"
 
 func BenchmarkNextAnsiEscapeSequence(b *testing.B) {
 	b.SetBytes(int64(len(ansiBenchmarkString)))
@@ -409,7 +411,7 @@ func BenchmarkNextAnsiEscapeSequence_Regex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		s := ansiBenchmarkString
 		for {
-			a := ansiRegexRefence.FindStringIndex(s)
+			a := ansiRegexReference.FindStringIndex(s)
 			if len(a) == 0 {
 				break
 			}

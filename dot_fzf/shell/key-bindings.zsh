@@ -65,8 +65,10 @@ fzf-file-widget() {
   zle reset-prompt
   return $ret
 }
-zle     -N   fzf-file-widget
-bindkey '^T' fzf-file-widget
+zle     -N            fzf-file-widget
+bindkey -M emacs '^T' fzf-file-widget
+bindkey -M vicmd '^T' fzf-file-widget
+bindkey -M viins '^T' fzf-file-widget
 
 # ALT-C - cd into the selected directory
 fzf-cd-widget() {
@@ -79,22 +81,24 @@ fzf-cd-widget() {
     return 0
   fi
   zle push-line # Clear buffer. Auto-restored on next prompt.
-  BUFFER="cd ${(q)dir}"
+  BUFFER="builtin cd -- ${(q)dir}"
   zle accept-line
   local ret=$?
   unset dir # ensure this doesn't end up appearing in prompt expansion
   zle reset-prompt
   return $ret
 }
-zle     -N    fzf-cd-widget
-bindkey '\ec' fzf-cd-widget
+zle     -N             fzf-cd-widget
+bindkey -M emacs '\ec' fzf-cd-widget
+bindkey -M vicmd '\ec' fzf-cd-widget
+bindkey -M viins '\ec' fzf-cd-widget
 
 # CTRL-R - Paste the selected command from history into the command line
 fzf-history-widget() {
   local selected num
   setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2> /dev/null
-  selected=( $(fc -rl 1 | perl -ne 'print if !$seen{(/^\s*[0-9]+\**\s+(.*)/, $1)}++' |
-    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --tiebreak=index --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m" $(__fzfcmd)) )
+  selected=( $(fc -rl 1 | awk '{ cmd=$0; sub(/^[ \t]*[0-9]+\**[ \t]+/, "", cmd); if (!seen[cmd]++) print $0 }' |
+    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --scheme=history --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m" $(__fzfcmd)) )
   local ret=$?
   if [ -n "$selected" ]; then
     num=$selected[1]
@@ -105,8 +109,10 @@ fzf-history-widget() {
   zle reset-prompt
   return $ret
 }
-zle     -N   fzf-history-widget
-bindkey '^R' fzf-history-widget
+zle     -N            fzf-history-widget
+bindkey -M emacs '^R' fzf-history-widget
+bindkey -M vicmd '^R' fzf-history-widget
+bindkey -M viins '^R' fzf-history-widget
 
 } always {
   eval $__fzf_key_bindings_options

@@ -20,6 +20,7 @@ jobs:
       matrix:
         version:
           - master
+          - 5.8.1
           - 5.8
           - 5.7.1
           - 5.7
@@ -53,7 +54,7 @@ jobs:
           - 4.3.12
           - 4.3.11
     container:
-      image: zshusers/zsh:${{ matrix.version }}
+      image: ghcr.io/zsh-users/zsh:${{ matrix.version }}
     steps:
       - uses: actions/checkout@v2
       - run: install_packages bsdmainutils make procps

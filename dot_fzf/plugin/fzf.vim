@@ -96,7 +96,12 @@ function! fzf#shellescape(arg, ...)
   if shell =~# 'cmd.exe$'
     return s:shellesc_cmd(a:arg)
   endif
-  return s:fzf_call('shellescape', a:arg)
+  try
+    let [shell, &shell] = [&shell, shell]
+    return s:fzf_call('shellescape', a:arg)
+  finally
+    let [shell, &shell] = [&shell, shell]
+  endtry
 endfunction
 
 function! s:fzf_getcwd()
@@ -159,7 +164,7 @@ function s:get_version(bin)
   if has_key(s:versions, a:bin)
     return s:versions[a:bin]
   end
-  let command = a:bin . ' --version'
+  let command = (&shell =~ 'powershell' ? '&' : '') . shellescape(a:bin) . ' --version --no-height'
   let output = systemlist(command)
   if v:shell_error || empty(output)
     return ''
@@ -337,7 +342,8 @@ function! s:common_sink(action, lines) abort
 endfunction
 
 function! s:get_color(attr, ...)
-  let gui = !s:is_win && !has('win32unix') && has('termguicolors') && &termguicolors
+  " Force 24 bit colors: g:fzf_force_termguicolors (temporary workaround for https://github.com/junegunn/fzf.vim/issues/1152)
+  let gui = get(g:, 'fzf_force_termguicolors', 0) || (!s:is_win && !has('win32unix') && has('termguicolors') && &termguicolors)
   let fam = gui ? 'gui' : 'cterm'
   let pat = gui ? '^#[a-f0-9]\+' : '^[0-9]\+$'
   for group in a:000
@@ -419,13 +425,13 @@ function! fzf#wrap(...)
   endif
 
   " Action: g:fzf_action
-  if !s:has_any(opts, ['sink', 'sink*'])
+  if !s:has_any(opts, ['sink', 'sinklist', 'sink*'])
     let opts._action = get(g:, 'fzf_action', s:default_action)
     let opts.options .= ' --expect='.join(keys(opts._action), ',')
-    function! opts.sink(lines) abort
+    function! opts.sinklist(lines) abort
       return s:common_sink(self._action, a:lines)
     endfunction
-    let opts['sink*'] = remove(opts, 'sink')
+    let opts['sink*'] = opts.sinklist " For backward compatibility
   endif
 
   return opts
@@ -442,6 +448,12 @@ function! s:use_sh()
     set shell=sh
   endif
   return [shell, shellslash, shellcmdflag, shellxquote]
+endfunction
+
+function! s:writefile(...)
+  if call('writefile', a:000) == -1
+    throw 'Failed to write temporary file. Check if you can write to the path tempname() returns.'
+  endif
 endfunction
 
 function! fzf#run(...) abort
@@ -471,7 +483,7 @@ try
       let source_command = source
     elseif type == 3
       let temps.input = s:fzf_tempname()
-      call writefile(source, temps.input)
+      call s:writefile(source, temps.input)
       let source_command = (s:is_win ? 'type ' : 'cat ').fzf#shellescape(temps.input)
     else
       throw 'Invalid source type'
@@ -515,11 +527,12 @@ try
   call s:callback(dict, lines)
   return lines
 finally
-  if len(source_command)
+  if exists('source_command') && len(source_command)
     if len(prev_default_command)
       let $FZF_DEFAULT_COMMAND = prev_default_command
     else
-      execute 'unlet $FZF_DEFAULT_COMMAND'
+      let $FZF_DEFAULT_COMMAND = ''
+      silent! execute 'unlet $FZF_DEFAULT_COMMAND'
     endif
   endif
   let [&shell, &shellslash, &shellcmdflag, &shellxquote] = [shell, shellslash, shellcmdflag, shellxquote]
@@ -659,7 +672,7 @@ function! s:execute(dict, command, use_height, temps) abort
   endif
   if s:is_win
     let batchfile = s:fzf_tempname().'.bat'
-    call writefile(s:wrap_cmds(command), batchfile)
+    call s:writefile(s:wrap_cmds(command), batchfile)
     let command = batchfile
     let a:temps.batchfile = batchfile
     if has('nvim')
@@ -677,7 +690,7 @@ function! s:execute(dict, command, use_height, temps) abort
     endif
   elseif has('win32unix') && $TERM !=# 'cygwin'
     let shellscript = s:fzf_tempname()
-    call writefile([command], shellscript)
+    call s:writefile([command], shellscript)
     let command = 'cmd.exe /C '.fzf#shellescape('set "TERM=" & start /WAIT sh -c '.shellscript)
     let a:temps.shellscript = shellscript
   endif
@@ -876,7 +889,7 @@ function! s:execute_term(dict, command, temps) abort
     call s:pushd(a:dict)
     if s:is_win
       let fzf.temps.batchfile = s:fzf_tempname().'.bat'
-      call writefile(s:wrap_cmds(a:command), fzf.temps.batchfile)
+      call s:writefile(s:wrap_cmds(a:command), fzf.temps.batchfile)
       let command = fzf.temps.batchfile
     else
       let command = a:command
@@ -943,6 +956,8 @@ function! s:callback(dict, lines) abort
     endif
     if has_key(a:dict, 'sink*')
       call a:dict['sink*'](a:lines)
+    elseif has_key(a:dict, 'sinklist')
+      call a:dict['sinklist'](a:lines)
     endif
   catch
     if stridx(v:exception, ':E325:') < 0

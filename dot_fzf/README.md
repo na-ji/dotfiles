@@ -86,7 +86,7 @@ stuff.
 
 ### Using Homebrew
 
-You can use [Homebrew](http://brew.sh/) (on macOS or Linux)
+You can use [Homebrew](https://brew.sh/) (on macOS or Linux)
 to install fzf.
 
 ```sh
@@ -130,6 +130,8 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 > may not be enabled by default.**
 >
 > Refer to the package documentation for more information. (e.g. `apt-cache show fzf`)
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/fzf.svg)](https://repology.org/project/fzf/versions)
 
 ### Windows
 
@@ -202,7 +204,7 @@ vim $(fzf)
 
 #### Using the finder
 
-- `CTRL-J` / `CTRL-K` (or `CTRL-N` / `CTRL-P`) to move cursor up and down
+- `CTRL-K` / `CTRL-J` (or `CTRL-P` / `CTRL-N`) to move cursor up and down
 - `Enter` key to select the item, `CTRL-C` / `CTRL-G` / `ESC` to exit
 - On multi-select mode (`-m`), `TAB` and `Shift-TAB` to mark multiple items
 - Emacs style key bindings
@@ -380,12 +382,11 @@ cd ~/github/fzf**<TAB>
 
 #### Process IDs
 
-Fuzzy completion for PIDs is provided for kill command. In this case,
-there is no trigger sequence; just press the tab key after the kill command.
+Fuzzy completion for PIDs is provided for kill command.
 
 ```sh
 # Can select multiple processes with <TAB> or <Shift-TAB> keys
-kill -9 <TAB>
+kill -9 **<TAB>
 ```
 
 #### Host names
@@ -556,7 +557,7 @@ more details.
 
 ```sh
 FZF_DEFAULT_COMMAND='ps -ef' \
-  fzf --bind 'ctrl-r:reload($FZF_DEFAULT_COMMAND)' \
+  fzf --bind 'ctrl-r:reload(eval "$FZF_DEFAULT_COMMAND")' \
       --header 'Press CTRL-R to reload' --header-lines=1 \
       --height=50% --layout=reverse
 ```
@@ -565,7 +566,7 @@ FZF_DEFAULT_COMMAND='ps -ef' \
 
 ```sh
 FZF_DEFAULT_COMMAND='find . -type f' \
-  fzf --bind 'ctrl-d:reload(find . -type d),ctrl-f:reload($FZF_DEFAULT_COMMAND)' \
+  fzf --bind 'ctrl-d:reload(find . -type d),ctrl-f:reload(eval "$FZF_DEFAULT_COMMAND")' \
       --height=50% --layout=reverse
 ```
 
@@ -574,7 +575,7 @@ FZF_DEFAULT_COMMAND='find . -type f' \
 The following example uses fzf as the selector interface for ripgrep. We bound
 `reload` action to `change` event, so every time you type on fzf, the ripgrep
 process will restart with the updated query string denoted by the placeholder
-expression `{q}`. Also, note that we used `--disabled` option so that fzf 
+expression `{q}`. Also, note that we used `--disabled` option so that fzf
 doesn't perform any secondary filtering.
 
 ```sh
@@ -589,6 +590,9 @@ FZF_DEFAULT_COMMAND="$RG_PREFIX '$INITIAL_QUERY'" \
 If ripgrep doesn't find any matches, it will exit with a non-zero exit status,
 and fzf will warn you about it. To suppress the warning message, we added
 `|| true` to the command, so that it always exits with 0.
+
+See ["Using fzf as interative Ripgrep launcher"](https://github.com/junegunn/fzf/blob/master/ADVANCED.md#using-fzf-as-interative-ripgrep-launcher)
+for a fuller example with preview window options.
 
 ### Preview window
 
@@ -623,10 +627,7 @@ fzf --height 40% --layout reverse --info inline --border \
 
 See the man page (`man fzf`) for the full list of options.
 
-For more advanced examples, see [Key bindings for git with fzf][fzf-git]
-([code](https://gist.github.com/junegunn/8b572b8d4b5eddd8b85e5f4d40f17236)).
-
-[fzf-git]: https://junegunn.kr/2016/07/fzf-git/
+More advanced examples can be found [here](https://github.com/junegunn/fzf/blob/master/ADVANCED.md).
 
 ----
 
@@ -658,10 +659,10 @@ default find command to traverse the file system while respecting
 
 ```sh
 # Feed the output of fd into fzf
-fd --type f | fzf
+fd --type f --strip-cwd-prefix | fzf
 
 # Setting fd as the default source for fzf
-export FZF_DEFAULT_COMMAND='fd --type f'
+export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix'
 
 # Now fzf (w/o pipe) will use fd instead of find
 fzf
@@ -674,7 +675,7 @@ If you want the command to follow symbolic links and don't want it to exclude
 hidden files, use the following command:
 
 ```sh
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix --hidden --follow --exclude .git'
 ```
 
 #### Fish shell
