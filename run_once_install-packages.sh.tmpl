@@ -1,7 +1,7 @@
 #!/bin/sh
 {{ if eq .chezmoi.os "linux" -}}
 
-INSTALL_PKGS="zsh ripgrep zoxide bat exa xclip golang tmux byobu"
+INSTALL_PKGS="zsh ripgrep zoxide bat exa xclip golang tmux byobu micro"
 for i in $INSTALL_PKGS; do
   sudo apt-get install -y $i
 done
@@ -9,9 +9,12 @@ done
 mkdir -p ~/.local/bin
 ln -s /usr/bin/batcat ~/.local/bin/bat
 
+# https://github.com/atuinsh/atuin
+bash <(curl https://raw.githubusercontent.com/atuinsh/atuin/main/install.sh)
+
 {{ else if eq .chezmoi.os "darwin" -}}
 
-brew install ripgrep zoxide bat exa golang tmux byobu git-delta gh
+brew install ripgrep zoxide bat exa golang tmux byobu git-delta gh atuin micro
 
 {{ end -}}
 
@@ -36,7 +39,7 @@ pip3 install thefuck
 ~/.fzf/install --all
 
 # byobu
-byobu-enable
+# byobu-enable
 
 # https://github.com/rotblauer/gifit
 #go get github.com/rotblauer/gifit
