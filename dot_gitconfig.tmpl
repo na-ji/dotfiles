@@ -15,10 +15,10 @@
 # Show tag message
     tag-message = "!git show $1 | awk -v capture=0 '{ if(capture) message=message\"\\n\"$0}; BEGIN {message=\"\"}; { if ($1 == \"Date:\" && length(message)==0 ) {capture=1}; if ($1 == \"commit\" ) {capture=0}  }; END { print message }' | sed '$ d' | cat -s #"
 
-### Move tag. Use: git tagm <tagname> <newcommit> 
+### Move tag. Use: git tagm <tagname> <newcommit>
     tagm = "!GIT_TAG_MESSAGE=$(git tag-message $1) && GIT_COMMITTER_DATE=$(git tag-date $1) && git tag-message $1 && git tag -d $1 && git tag -a $1 $2 -m \"$GIT_TAG_MESSAGE\" #"
 
-### Move pushed tag. Use: git tagmp <tagname> <newcommit> 
+### Move pushed tag. Use: git tagmp <tagname> <newcommit>
     tagmp = "!git tagm $1 $2 && git push --delete origin $1 && git push origin $1 #"
 [user]
     name = {{ .name }}
@@ -33,7 +33,7 @@
     status = auto
     ui = auto
 [core]
-    editor = nano
+    editor = micro
     packedGitLimit = 500m
     packedGitWindowSize = 10m
     packedWindowSize = 500m
@@ -66,9 +66,24 @@
     textconv = sops -d
 [pull]
     rebase = true
+    ff = only
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/
+[url "git@github.com:"]
+	insteadOf = https://github.com/
 {{- if ne .signkeyid "" }}
 {{ if eq .chezmoi.os "darwin" -}}
 [gpg]
     program = /opt/homebrew/bin/gpg
 {{ end -}}
 {{ end -}}
+[init]
+	defaultBranch = main
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[diff "lockb"]
+	textconv = bun
+	binary = true

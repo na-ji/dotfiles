@@ -79,7 +79,10 @@ export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # https://github.com/junegunn/fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# https://github.com/atuinsh/atuin
+eval "$(atuin init zsh)"
 
 # https://github.com/ajeetdsouza/zoxide
 eval "$(zoxide init zsh)"
@@ -111,9 +114,9 @@ export PATH="$HOME/bin:$PATH"
 
 # https://github.com/rotblauer/gifit
 gifhub() {
-    gifit "$1" | 
+    gifit "$1" |
 {{- if eq .chezmoi.os "linux" -}}
-xclip -selection clipboard 
+xclip -selection clipboard
 {{- else if eq .chezmoi.os "darwin" -}}
 pbcopy
 {{- end }}
@@ -130,6 +133,23 @@ if [ -f '{{ .chezmoi.homeDir }}/Downloads/google-cloud-sdk/path.zsh.inc' ]; then
 # The next line enables shell command completion for gcloud.
 if [ -f '{{ .chezmoi.homeDir }}/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '{{ .chezmoi.homeDir }}/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
 {{- end }}
+
+{{ if eq .chezmoi.os "darwin" -}}
+# pnpm
+export PNPM_HOME="{{ .chezmoi.homeDir }}/Library/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end
+{{- end }}
+
+# Created by `pipx` on 2023-02-09 10:23:26
+export PATH="$PATH:{{ .chezmoi.homeDir }}/.local/bin"
+
+# bun completions
+[ -s "{{ .chezmoi.homeDir }}/.bun/_bun" ] && source "{{ .chezmoi.homeDir }}/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
 
 # https://starship.rs/
 eval "$(starship init zsh)"
