@@ -12,7 +12,10 @@ differ depending on the package manager.
 " If installed using Homebrew
 set rtp+=/usr/local/opt/fzf
 
-" If installed using git
+" If installed using Homebrew on Apple Silicon
+set rtp+=/opt/homebrew/opt/fzf
+
+" If you have cloned fzf on ~/.fzf directory
 set rtp+=~/.fzf
 ```
 
@@ -23,7 +26,10 @@ written as:
 " If installed using Homebrew
 Plug '/usr/local/opt/fzf'
 
-" If installed using git
+" If installed using Homebrew on Apple Silicon
+Plug '/opt/homebrew/opt/fzf'
+
+" If you have cloned fzf on ~/.fzf directory
 Plug '~/.fzf'
 ```
 
@@ -115,7 +121,7 @@ let g:fzf_action = {
 
 " An action can be a reference to a function that processes selected lines
 function! s:build_quickfix_list(lines)
-  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
+  call setqflist(map(copy(a:lines), '{ "filename": v:val, "lnum": 1 }'))
   copen
   cc
 endfunction
@@ -232,19 +238,20 @@ call fzf#run({'sink': 'e'})
 ```
 
 We haven't specified the `source`, so this is equivalent to starting fzf on
-command line without standard input pipe; fzf will use find command (or
-`$FZF_DEFAULT_COMMAND` if defined) to list the files under the current
-directory. When you select one, it will open it with the sink, `:e` command.
-If you want to open it in a new tab, you can pass `:tabedit` command instead
-as the sink.
+command line without standard input pipe; fzf will traverse the file system
+under the current directory to get the list of files. (If
+`$FZF_DEFAULT_COMMAND` is set, fzf will use the output of the command
+instead.) When you select one, it will open it with the sink, `:e` command. If
+you want to open it in a new tab, you can pass `:tabedit` command instead as
+the sink.
 
 ```vim
 call fzf#run({'sink': 'tabedit'})
 ```
 
-Instead of using the default find command, you can use any shell command as
-the source. The following example will list the files managed by git. It's
-equivalent to running `git ls-files | fzf` on shell.
+You can use any shell command as the source to generate the list. The
+following example will list the files managed by git. It's equivalent to
+running `git ls-files | fzf` on shell.
 
 ```vim
 call fzf#run({'source': 'git ls-files', 'sink': 'e'})
@@ -309,7 +316,7 @@ following options are allowed:
     - `yoffset` [float default 0.5 range [0 ~ 1]]
     - `xoffset` [float default 0.5 range [0 ~ 1]]
     - `relative` [boolean default v:false]
-    - `border` [string default `rounded`]: Border style
+    - `border` [string default `rounded` (`sharp` on Windows)]: Border style
         - `rounded` / `sharp` / `horizontal` / `vertical` / `top` / `bottom` / `left` / `right` / `no[ne]`
 
 `fzf#wrap`
@@ -483,4 +490,4 @@ autocmd  FileType fzf set laststatus=0 noshowmode noruler
 
 The MIT License (MIT)
 
-Copyright (c) 2013-2021 Junegunn Choi
+Copyright (c) 2013-2024 Junegunn Choi

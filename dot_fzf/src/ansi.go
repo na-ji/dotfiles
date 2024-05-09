@@ -292,7 +292,7 @@ func extractColor(str string, state *ansiState, proc func(string, *ansiState) bo
 
 func parseAnsiCode(s string, delimiter byte) (int, byte, string) {
 	var remaining string
-	i := -1
+	var i int
 	if delimiter == 0 {
 		// Faster than strings.IndexAny(";:")
 		i = strings.IndexByte(s, ';')
@@ -312,7 +312,7 @@ func parseAnsiCode(s string, delimiter byte) (int, byte, string) {
 		// Inlined version of strconv.Atoi() that only handles positive
 		// integers and does not allocate on error.
 		code := 0
-		for _, ch := range []byte(s) {
+		for _, ch := range stringBytes(s) {
 			ch -= '0'
 			if ch > 9 {
 				return -1, delimiter, remaining
@@ -350,10 +350,12 @@ func interpretCode(ansiCode string, prevState *ansiState) ansiState {
 	state256 := 0
 	ptr := &state.fg
 
-	var delimiter byte = 0
+	var delimiter byte
+	count := 0
 	for len(ansiCode) != 0 {
 		var num int
 		if num, delimiter, ansiCode = parseAnsiCode(ansiCode, delimiter); num != -1 {
+			count++
 			switch state256 {
 			case 0:
 				switch num {
@@ -381,10 +383,19 @@ func interpretCode(ansiCode string, prevState *ansiState) ansiState {
 					state.attr = state.attr | tui.Reverse
 				case 9:
 					state.attr = state.attr | tui.StrikeThrough
+				case 22:
+					state.attr = state.attr &^ tui.Bold
+					state.attr = state.attr &^ tui.Dim
 				case 23: // tput rmso
 					state.attr = state.attr &^ tui.Italic
 				case 24: // tput rmul
 					state.attr = state.attr &^ tui.Underline
+				case 25:
+					state.attr = state.attr &^ tui.Blink
+				case 27:
+					state.attr = state.attr &^ tui.Reverse
+				case 29:
+					state.attr = state.attr &^ tui.StrikeThrough
 				case 0:
 					state.fg = -1
 					state.bg = -1
@@ -424,6 +435,13 @@ func interpretCode(ansiCode string, prevState *ansiState) ansiState {
 				state256 = 0
 			}
 		}
+	}
+
+	// Empty sequence: reset
+	if count == 0 {
+		state.fg = -1
+		state.bg = -1
+		state.attr = 0
 	}
 
 	if state256 > 0 {
