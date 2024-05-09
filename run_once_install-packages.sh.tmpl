@@ -14,7 +14,7 @@ bash <(curl https://raw.githubusercontent.com/atuinsh/atuin/main/install.sh)
 
 {{ else if eq .chezmoi.os "darwin" -}}
 
-brew install ripgrep zoxide bat exa golang tmux byobu git-delta gh atuin micro alacritty orbstack stats
+brew install ripgrep zoxide bat exa golang tmux byobu git-delta gh atuin micro alacritty orbstack stats battery
 
 # https://www.nerdfonts.com/
 brew tap homebrew/cask-fonts
@@ -30,6 +30,9 @@ brew install --cask alt-tab
 
 # https://github.com/newmarcel/KeepingYouAwake
 brew install --cask keepingyouawake
+
+# https://github.com/actuallymentor/battery/
+battery maintain 80
 
 {{ end -}}
 
