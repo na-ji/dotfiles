@@ -14,13 +14,19 @@ bash <(curl https://raw.githubusercontent.com/atuinsh/atuin/main/install.sh)
 
 {{ else if eq .chezmoi.os "darwin" -}}
 
-brew install ripgrep zoxide bat exa golang tmux byobu git-delta gh atuin micro alacritty
+brew install ripgrep zoxide bat exa golang tmux byobu git-delta gh atuin micro alacritty orbstack
 
 # https://www.nerdfonts.com/
 brew tap homebrew/cask-fonts
 brew install --cask font-fira-code-nerd-font
 
 brew install --cask jetbrains-toolbox
+
+# https://github.com/ianyh/Amethyst
+brew install --cask amethyst
+
+# https://alt-tab-macos.netlify.app/
+brew install --cask alt-tab
 
 {{ end -}}
 
