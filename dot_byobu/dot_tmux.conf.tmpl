@@ -20,5 +20,8 @@ set-option -g automatic-rename-format '#{b:pane_current_path}'
 # prevent byobu from renaming new windows
 bind-key -n F2 new-window
 
+# fix tmux resurrect disabling automatic-rename
+set -g @resurrect-hook-post-restore-all '~/.byobu/fix_tmux_window.sh'
+
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
 run -b '~/.tmux/plugins/tpm/tpm'
