@@ -1,7 +1,7 @@
 #!/bin/sh
 {{ if eq .chezmoi.os "linux" -}}
 
-INSTALL_PKGS="zsh ripgrep zoxide bat exa xclip golang tmux byobu micro"
+INSTALL_PKGS="zsh ripgrep zoxide bat eza xclip golang tmux byobu micro"
 for i in $INSTALL_PKGS; do
   sudo apt-get install -y $i
 done
@@ -14,7 +14,7 @@ bash <(curl https://raw.githubusercontent.com/atuinsh/atuin/main/install.sh)
 
 {{ else if eq .chezmoi.os "darwin" -}}
 
-brew install ripgrep zoxide bat exa golang tmux byobu git-delta gh atuin micro alacritty orbstack stats battery
+brew install ripgrep zoxide bat eza golang tmux byobu git-delta gh atuin micro alacritty orbstack stats battery
 
 # https://www.nerdfonts.com/
 brew tap homebrew/cask-fonts
