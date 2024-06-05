@@ -10,7 +10,7 @@ mkdir -p ~/.local/bin
 ln -s /usr/bin/batcat ~/.local/bin/bat
 
 # https://github.com/atuinsh/atuin
-bash <(curl https://raw.githubusercontent.com/atuinsh/atuin/main/install.sh)
+curl -o- https://raw.githubusercontent.com/atuinsh/atuin/main/install.sh | bash
 
 {{ else if eq .chezmoi.os "darwin" -}}
 
