@@ -3,7 +3,11 @@
 
 INSTALL_PKGS="zsh ripgrep zoxide bat eza xclip tmux byobu micro lazygit"
 for i in $INSTALL_PKGS; do
+  {{ if eq (index .chezmoi.osRelease "idLike") "debian" -}}
   sudo apt-get install -y $i
+  {{- else if eq .chezmoi.osRelease.id "alpine" -}}
+  sudo apk add $i
+  {{- end }}
 done
 
 mkdir -p ~/.local/bin
