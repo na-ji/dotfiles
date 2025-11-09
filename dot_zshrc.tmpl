@@ -137,7 +137,10 @@ if [ -f '{{ .chezmoi.homeDir }}/Downloads/google-cloud-sdk/completion.zsh.inc' ]
 {{ if eq .chezmoi.os "darwin" -}}
 # pnpm
 export PNPM_HOME="{{ .chezmoi.homeDir }}/Library/pnpm"
-export PATH="$PNPM_HOME:$PATH"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
 # pnpm end
 {{- end }}
 
@@ -150,6 +153,13 @@ export PATH="$PATH:{{ .chezmoi.homeDir }}/.local/bin"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+{{ if eq .chezmoi.os "darwin" -}}
+# openjdk
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+# postgresql
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+{{- end }}
 
 # https://starship.rs/
 eval "$(starship init zsh)"

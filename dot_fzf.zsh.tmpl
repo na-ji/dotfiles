@@ -4,8 +4,8 @@
 if [[ ! "$PATH" == */usr/local/opt/fzf/bin* ]]; then
   export PATH="${PATH:+${PATH}:}/usr/local/opt/fzf/bin"
 {{- else if eq .chezmoi.os "darwin" -}}
-if [[ ! "$PATH" == */Users/naji/.fzf/bin* ]]; then
-  export PATH="${PATH:+${PATH}:}/Users/naji/.fzf/bin"
+if [[ ! "$PATH" == *{{ .chezmoi.homeDir }}/.fzf/bin* ]]; then
+  export PATH="${PATH:+${PATH}:}{{ .chezmoi.homeDir }}/.fzf/bin"
 {{- end }}
 fi
 
@@ -14,7 +14,7 @@ fi
 {{ if eq .chezmoi.os "linux" -}}
 [[ $- == *i* ]] && source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
 {{- else if eq .chezmoi.os "darwin" -}}
-[[ $- == *i* ]] && source "/Users/naji/.fzf/shell/completion.zsh" 2> /dev/null
+[[ $- == *i* ]] && source "{{ .chezmoi.homeDir }}/.fzf/shell/completion.zsh" 2> /dev/null
 {{- end }}
 
 # Key bindings
@@ -22,5 +22,5 @@ fi
 {{ if eq .chezmoi.os "linux" -}}
 source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 {{- else if eq .chezmoi.os "darwin" -}}
-source "/Users/naji/.fzf/shell/key-bindings.zsh"
+source "{{ .chezmoi.homeDir }}/.fzf/shell/key-bindings.zsh"
 {{- end }}
