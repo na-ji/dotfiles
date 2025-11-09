@@ -155,6 +155,7 @@ let g:fzf_layout = { 'window': '10new' }
 let g:fzf_colors =
 \ { 'fg':      ['fg', 'Normal'],
   \ 'bg':      ['bg', 'Normal'],
+  \ 'query':   ['fg', 'Normal'],
   \ 'hl':      ['fg', 'Comment'],
   \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
   \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
@@ -289,12 +290,13 @@ The following table summarizes the available options.
 | `source`                   | string        | External command to generate input to fzf (e.g. `find .`)             |
 | `source`                   | list          | Vim list as input to fzf                                              |
 | `sink`                     | string        | Vim command to handle the selected item (e.g. `e`, `tabe`)            |
-| `sink`                     | funcref       | Reference to function to process each selected item                   |
+| `sink`                     | funcref       | Function to be called with each selected item                         |
 | `sinklist` (or `sink*`)    | funcref       | Similar to `sink`, but takes the list of output lines at once         |
+| `exit`                     | funcref       | Function to be called with the exit status of fzf (e.g. 0, 1, 2, 130) |
 | `options`                  | string/list   | Options to fzf                                                        |
 | `dir`                      | string        | Working directory                                                     |
 | `up`/`down`/`left`/`right` | number/string | (Layout) Window position and size (e.g. `20`, `50%`)                  |
-| `tmux`                     | string        | (Layout) fzf-tmux options (e.g. `-p90%,60%`)                          |
+| `tmux`                     | string        | (Layout) `--tmux` options (e.g. `90%,70%`)                            |
 | `window` (Vim 8 / Neovim)  | string        | (Layout) Command to open fzf window (e.g. `vertical aboveleft 30new`) |
 | `window` (Vim 8 / Neovim)  | dict          | (Layout) Popup window settings (e.g. `{'width': 0.9, 'height': 0.6}`) |
 
@@ -457,12 +459,13 @@ let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
 ```
 
 Alternatively, you can make fzf open in a tmux popup window (requires tmux 3.2
-or above) by putting fzf-tmux options in `tmux` key.
+or above) by putting `--tmux` option value in `tmux` key.
 
 ```vim
-" See `man fzf-tmux` for available options
+" See `--tmux` option in `man fzf` for available options
+" [center|top|bottom|left|right][,SIZE[%]][,SIZE[%]]
 if exists('$TMUX')
-  let g:fzf_layout = { 'tmux': '-p90%,60%' }
+  let g:fzf_layout = { 'tmux': '90%,70%' }
 else
   let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
 endif
@@ -490,4 +493,4 @@ autocmd  FileType fzf set laststatus=0 noshowmode noruler
 
 The MIT License (MIT)
 
-Copyright (c) 2013-2024 Junegunn Choi
+Copyright (c) 2013-2025 Junegunn Choi

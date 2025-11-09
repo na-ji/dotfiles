@@ -1,20 +1,28 @@
-SHELL          := bash
 GO             ?= go
 GOOS           ?= $(shell $(GO) env GOOS)
 
 MAKEFILE       := $(realpath $(lastword $(MAKEFILE_LIST)))
 ROOT_DIR       := $(shell dirname $(MAKEFILE))
-SOURCES        := $(wildcard *.go src/*.go src/*/*.go shell/*sh) $(MAKEFILE)
+SOURCES        := $(wildcard *.go src/*.go src/*/*.go shell/*sh man/man1/*.1) $(MAKEFILE)
+
+BASH_SCRIPTS   := $(ROOT_DIR)/bin/fzf-preview.sh \
+					$(ROOT_DIR)/bin/fzf-tmux \
+					$(ROOT_DIR)/install \
+					$(ROOT_DIR)/uninstall \
+					$(ROOT_DIR)/shell/common.sh \
+					$(ROOT_DIR)/shell/update.sh \
+					$(ROOT_DIR)/shell/completion.bash \
+					$(ROOT_DIR)/shell/key-bindings.bash
 
 ifdef FZF_VERSION
 VERSION        := $(FZF_VERSION)
 else
-VERSION        := $(shell git describe --abbrev=0 2> /dev/null)
+VERSION        := $(shell git describe --abbrev=0 2> /dev/null | sed "s/^v//")
 endif
 ifeq ($(VERSION),)
 $(error Not on git repository; cannot determine $$FZF_VERSION)
 endif
-VERSION_TRIM   := $(shell sed "s/-.*//" <<< $(VERSION))
+VERSION_TRIM   := $(shell echo $(VERSION) | sed "s/^v//; s/-.*//")
 VERSION_REGEX  := $(subst .,\.,$(VERSION_TRIM))
 
 ifdef FZF_REVISION
@@ -77,15 +85,26 @@ endif
 all: target/$(BINARY)
 
 test: $(SOURCES)
-	[ -z "$$(gofmt -s -d src)" ] || (gofmt -s -d src; exit 1)
 	SHELL=/bin/sh GOOS= $(GO) test -v -tags "$(TAGS)" \
 				github.com/junegunn/fzf/src \
 				github.com/junegunn/fzf/src/algo \
 				github.com/junegunn/fzf/src/tui \
 				github.com/junegunn/fzf/src/util
 
+itest:
+	ruby test/runner.rb
+
 bench:
 	cd src && SHELL=/bin/sh GOOS= $(GO) test -v -tags "$(TAGS)" -run=Bench -bench=. -benchmem
+
+lint: $(SOURCES) test/*.rb test/lib/*.rb ${BASH_SCRIPTS}
+	[ -z "$$(gofmt -s -d src)" ] || (gofmt -s -d src; exit 1)
+	bundle exec rubocop -a --require rubocop-minitest --require rubocop-performance
+	shell/update.sh --check ${BASH_SCRIPTS}
+
+fmt: $(SOURCES) $(BASH_SCRIPTS)
+	gofmt -s -w src
+	shell/update.sh ${BASH_SCRIPTS}
 
 install: bin/fzf
 
@@ -184,4 +203,4 @@ update:
 	$(GO) get -u
 	$(GO) mod tidy
 
-.PHONY: all generate build release test bench install clean docker docker-test update
+.PHONY: all generate build release test itest bench lint install clean docker docker-test update fmt

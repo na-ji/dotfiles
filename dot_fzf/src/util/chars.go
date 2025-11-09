@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
 	"unicode"
 	"unicode/utf8"
@@ -72,6 +73,35 @@ func (chars *Chars) IsBytes() bool {
 
 func (chars *Chars) Bytes() []byte {
 	return chars.slice
+}
+
+func (chars *Chars) NumLines(atMost int) (int, bool) {
+	lines := 1
+	if runes := chars.optionalRunes(); runes != nil {
+		for _, r := range runes {
+			if r == '\n' {
+				lines++
+			}
+			if lines > atMost {
+				return atMost, true
+			}
+		}
+		return lines, false
+	}
+
+	for idx := 0; idx < len(chars.slice); idx++ {
+		found := bytes.IndexByte(chars.slice[idx:], '\n')
+		if found < 0 {
+			break
+		}
+
+		idx += found
+		lines++
+		if lines > atMost {
+			return atMost, true
+		}
+	}
+	return lines, false
 }
 
 func (chars *Chars) optionalRunes() []rune {
@@ -154,9 +184,31 @@ func (chars *Chars) TrailingWhitespaces() int {
 	return whitespaces
 }
 
-func (chars *Chars) TrimTrailingWhitespaces() {
+func (chars *Chars) TrimTrailingWhitespaces(maxIndex int) {
 	whitespaces := chars.TrailingWhitespaces()
-	chars.slice = chars.slice[0 : len(chars.slice)-whitespaces]
+	end := len(chars.slice) - whitespaces
+	chars.slice = chars.slice[0:Max(end, maxIndex)]
+}
+
+func (chars *Chars) TrimSuffix(runes []rune) {
+	lastIdx := len(chars.slice)
+	firstIdx := lastIdx - len(runes)
+	if firstIdx < 0 {
+		return
+	}
+
+	for i := firstIdx; i < lastIdx; i++ {
+		char := chars.Get(i)
+		if char != runes[i-firstIdx] {
+			return
+		}
+	}
+
+	chars.slice = chars.slice[0:firstIdx]
+}
+
+func (chars *Chars) SliceRight(last int) {
+	chars.slice = chars.slice[:last]
 }
 
 func (chars *Chars) ToString() string {
@@ -195,4 +247,89 @@ func (chars *Chars) Prepend(prefix string) {
 	} else {
 		chars.slice = append([]byte(prefix), chars.slice...)
 	}
+}
+
+func (chars *Chars) Lines(multiLine bool, maxLines int, wrapCols int, wrapSignWidth int, tabstop int) ([][]rune, bool) {
+	text := make([]rune, chars.Length())
+	copy(text, chars.ToRunes())
+
+	lines := [][]rune{}
+	overflow := false
+	if !multiLine {
+		lines = append(lines, text)
+	} else {
+		from := 0
+		for off := 0; off < len(text); off++ {
+			if text[off] == '\n' {
+				lines = append(lines, text[from:off+1]) // Include '\n'
+				from = off + 1
+				if len(lines) >= maxLines {
+					break
+				}
+			}
+		}
+
+		var lastLine []rune
+		if from < len(text) {
+			lastLine = text[from:]
+		}
+
+		overflow = false
+		if len(lines) >= maxLines {
+			overflow = true
+		} else {
+			lines = append(lines, lastLine)
+		}
+	}
+
+	// If wrapping is disabled, we're done
+	if wrapCols == 0 {
+		return lines, overflow
+	}
+
+	wrapped := [][]rune{}
+	for _, line := range lines {
+		// Remove trailing '\n' and remember if it was there
+		newline := len(line) > 0 && line[len(line)-1] == '\n'
+		if newline {
+			line = line[:len(line)-1]
+		}
+
+		hasWrapSign := false
+		for {
+			cols := wrapCols
+			if hasWrapSign {
+				cols -= wrapSignWidth
+			}
+			_, overflowIdx := RunesWidth(line, 0, tabstop, cols)
+			if overflowIdx >= 0 {
+				// Might be a wide character
+				if overflowIdx == 0 {
+					overflowIdx = 1
+				}
+				if len(wrapped) >= maxLines {
+					return wrapped, true
+				}
+				wrapped = append(wrapped, line[:overflowIdx])
+				hasWrapSign = true
+				line = line[overflowIdx:]
+				continue
+			}
+			hasWrapSign = false
+
+			// Restore trailing '\n'
+			if newline {
+				line = append(line, '\n')
+			}
+
+			if len(wrapped) >= maxLines {
+				return wrapped, true
+			}
+
+			wrapped = append(wrapped, line)
+			break
+		}
+	}
+
+	return wrapped, overflow
 }

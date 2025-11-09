@@ -4,12 +4,19 @@ package tui
 
 import (
 	"os"
+	"sync/atomic"
 	"syscall"
 )
 
 var devPrefixes = [...]string{"/dev/pts/", "/dev/"}
 
+var tty atomic.Value
+
 func ttyname() string {
+	if cached := tty.Load(); cached != nil {
+		return cached.(string)
+	}
+
 	var stderr syscall.Stat_t
 	if syscall.Fstat(2, &stderr) != nil {
 		return ""
@@ -27,24 +34,21 @@ func ttyname() string {
 				continue
 			}
 			if stat, ok := info.Sys().(*syscall.Stat_t); ok && stat.Rdev == stderr.Rdev {
-				return prefix + file.Name()
+				value := prefix + file.Name()
+				tty.Store(value)
+				return value
 			}
 		}
 	}
 	return ""
 }
 
-// TtyIn returns terminal device to be used as STDIN, falls back to os.Stdin
-func TtyIn() *os.File {
-	in, err := os.OpenFile(consoleDevice, syscall.O_RDONLY, 0)
-	if err != nil {
-		tty := ttyname()
-		if len(tty) > 0 {
-			if in, err := os.OpenFile(tty, syscall.O_RDONLY, 0); err == nil {
-				return in
-			}
-		}
-		return os.Stdin
-	}
-	return in
+// TtyIn returns terminal device to read user input
+func TtyIn(ttyDefault string) (*os.File, error) {
+	return openTtyIn(ttyDefault)
+}
+
+// TtyOut returns terminal device to write to
+func TtyOut(ttyDefault string) (*os.File, error) {
+	return openTtyOut(ttyDefault)
 }

@@ -1,50 +1,56 @@
-<div align="center">
-<sup>Special thanks to:</sup>
-<br>
-<br>
-<a href="https://warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=fzf_20240209">
-  <div>
-    <img src="https://raw.githubusercontent.com/junegunn/i/master/warp.png" width="300" alt="Warp">
-  </div>
-  <b>Warp is a modern, Rust-based terminal with AI built in so you and your team can build great software, faster.</b>
-  <div>
-    <sup>Visit warp.dev to learn more.</sup>
-  </div>
-</a>
-<br>
-<hr>
-</div>
-<br>
+<div align="center" markdown="1">
+  <sup>Special thanks to:</sup>
+  <br>
+  <a href="https://tuple.app/fzf">
+    <img alt="Tuple's sponsorship image" src="https://raw.githubusercontent.com/junegunn/i/master/tuple.png" width="400">
+  </a>
 
-<img src="https://raw.githubusercontent.com/junegunn/i/master/fzf.png" height="170" alt="fzf - a command-line fuzzy finder"> [![github-actions](https://github.com/junegunn/fzf/workflows/Test%20fzf%20on%20Linux/badge.svg)](https://github.com/junegunn/fzf/actions)
-===
+### [Tuple, the premier screen sharing app for developers](https://tuple.app/fzf)
+[Available for MacOS & Windows](https://tuple.app/fzf)<br>
+
+---
+
+   <sup>Special thanks to:</sup>
+   <br>
+   <a href="https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=fzf">
+      <img alt="Warp sponsorship" width="400" src="https://github.com/user-attachments/assets/ab8dd143-b0fd-4904-bdc5-dd7ecac94eae">
+   </a>
+
+### [Warp, the intelligent terminal for developers](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=fzf)
+[Available for MacOS, Linux, & Windows](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=fzf)<br>
+
+</div>
+
+---
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-color.png" alt="fzf - a command-line fuzzy finder">
+  <a href="https://github.com/junegunn/fzf/actions"><img src="https://github.com/junegunn/fzf/actions/workflows/linux.yml/badge.svg?branch=master" alt="Build Status"></a>
+  <a href="http://github.com/junegunn/fzf/releases"><img src="https://img.shields.io/github/v/tag/junegunn/fzf" alt="Version"></a>
+  <a href="https://github.com/junegunn/fzf?tab=MIT-1-ov-file#readme"><img src="https://img.shields.io/github/license/junegunn/fzf" alt="License"></a>
+  <a href="https://github.com/junegunn/fzf/graphs/contributors"><img src="https://img.shields.io/github/contributors/junegunn/fzf" alt="Contributors"></a>
+  <a href="https://github.com/sponsors/junegunn"><img src="https://img.shields.io/github/sponsors/junegunn" alt="Sponsors"></a>
+  <a href="https://github.com/junegunn/fzf/stargazers"><img src="https://img.shields.io/github/stars/junegunn/fzf?style=flat" alt="Stars"></a>
+</div>
+
+---
 
 fzf is a general-purpose command-line fuzzy finder.
 
 <img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-preview.png" width=640>
 
-It's an interactive Unix filter for command-line that can be used with any
-list; files, command history, processes, hostnames, bookmarks, git commits,
-etc.
+It's an interactive filter program for any kind of list; files, command
+history, processes, hostnames, bookmarks, git commits, etc. It implements
+a "fuzzy" matching algorithm, so you can quickly type in patterns with omitted
+characters and still get the results you want.
 
-Pros
-----
+Highlights
+----------
 
-- Portable, no dependencies
-- Blazingly fast
-- The most comprehensive feature set
-- Flexible layout
-- Batteries included
-    - Vim/Neovim plugin, key bindings, and fuzzy auto-completion
-
-Sponsors ❤️
------------
-
-I would like to thank all the sponsors of this project who make it possible for me to continue to improve fzf.
-
-If you'd like to sponsor this project, please visit https://github.com/sponsors/junegunn.
-
-<!-- sponsors --><a href="https://github.com/miyanokomiya"><img src="https://github.com/miyanokomiya.png" width="60px" alt="miyanokomiya" /></a><a href="https://github.com/jonhoo"><img src="https://github.com/jonhoo.png" width="60px" alt="Jon Gjengset" /></a><a href="https://github.com/AceofSpades5757"><img src="https://github.com/AceofSpades5757.png" width="60px" alt="Kyle L. Davis" /></a><a href="https://github.com/Frederick888"><img src="https://github.com/Frederick888.png" width="60px" alt="Frederick Zhang" /></a><a href="https://github.com/moritzdietz"><img src="https://github.com/moritzdietz.png" width="60px" alt="Moritz Dietz" /></a><a href="https://github.com/mikker"><img src="https://github.com/mikker.png" width="60px" alt="Mikkel Malmberg" /></a><a href="https://github.com/pldubouilh"><img src="https://github.com/pldubouilh.png" width="60px" alt="Pierre Dubouilh" /></a><a href="https://github.com/rcorre"><img src="https://github.com/rcorre.png" width="60px" alt="Ryan Roden-Corrent" /></a><a href="https://github.com/blissdev"><img src="https://github.com/blissdev.png" width="60px" alt="Jordan Arentsen" /></a><a href="https://github.com/mislav"><img src="https://github.com/mislav.png" width="60px" alt="Mislav Marohnić" /></a><a href="https://github.com/aexvir"><img src="https://github.com/aexvir.png" width="60px" alt="Alex Viscreanu" /></a><a href="https://github.com/dbalatero"><img src="https://github.com/dbalatero.png" width="60px" alt="David Balatero" /></a><a href="https://github.com/comatory"><img src="https://github.com/comatory.png" width="60px" alt="Ondrej Synacek" /></a><a href="https://github.com/moobar"><img src="https://github.com/moobar.png" width="60px" alt="" /></a><a href="https://github.com/majjoha"><img src="https://github.com/majjoha.png" width="60px" alt="Mathias Jean Johansen" /></a><a href="https://github.com/benelan"><img src="https://github.com/benelan.png" width="60px" alt="Ben Elan" /></a><a href="https://github.com/pawelduda"><img src="https://github.com/pawelduda.png" width="60px" alt="Paweł Duda" /></a><a href="https://github.com/slezica"><img src="https://github.com/slezica.png" width="60px" alt="Santiago Lezica" /></a><a href="https://github.com/pbwn"><img src="https://github.com/pbwn.png" width="60px" alt="" /></a><a href="https://github.com/timgluz"><img src="https://github.com/timgluz.png" width="60px" alt="Timo Sulg" /></a><a href="https://github.com/pyrho"><img src="https://github.com/pyrho.png" width="60px" alt="Damien Rajon" /></a><a href="https://github.com/ArtBIT"><img src="https://github.com/ArtBIT.png" width="60px" alt="ArtBIT" /></a><a href="https://github.com/da-moon"><img src="https://github.com/da-moon.png" width="60px" alt="" /></a><a href="https://github.com/hovissimo"><img src="https://github.com/hovissimo.png" width="60px" alt="Hovis" /></a><a href="https://github.com/dariusjonda"><img src="https://github.com/dariusjonda.png" width="60px" alt="Darius Jonda" /></a><a href="https://github.com/cristiand391"><img src="https://github.com/cristiand391.png" width="60px" alt="Cristian Dominguez" /></a><a href="https://github.com/eliangcs"><img src="https://github.com/eliangcs.png" width="60px" alt="Chang-Hung Liang" /></a><a href="https://github.com/asphaltbuffet"><img src="https://github.com/asphaltbuffet.png" width="60px" alt="Ben Lechlitner" /></a><a href="https://github.com/yash1th"><img src="https://github.com/yash1th.png" width="60px" alt="yash" /></a><a href="https://github.com/looshch"><img src="https://github.com/looshch.png" width="60px" alt="george looshch" /></a><a href="https://github.com/kg8m"><img src="https://github.com/kg8m.png" width="60px" alt="Takumi KAGIYAMA" /></a><a href="https://github.com/polm"><img src="https://github.com/polm.png" width="60px" alt="Paul O'Leary McCann" /></a><a href="https://github.com/rbeeger"><img src="https://github.com/rbeeger.png" width="60px" alt="Robert Beeger" /></a><a href="https://github.com/veebch"><img src="https://github.com/veebch.png" width="60px" alt="VEEB Projects" /></a><a href="https://github.com/khuedoan"><img src="https://github.com/khuedoan.png" width="60px" alt="Khue Doan" /></a><a href="https://github.com/yowayb"><img src="https://github.com/yowayb.png" width="60px" alt="Yoway Buorn" /></a><a href="https://github.com/scalisi"><img src="https://github.com/scalisi.png" width="60px" alt="Josh Scalisi" /></a><a href="https://github.com/alecbcs"><img src="https://github.com/alecbcs.png" width="60px" alt="Alec Scott" /></a><a href="https://github.com/thnxdev"><img src="https://github.com/thnxdev.png" width="60px" alt="thanks.dev" /></a><a href="https://github.com/artursapek"><img src="https://github.com/artursapek.png" width="60px" alt="Artur Sapek" /></a><a href="https://github.com/ramnes"><img src="https://github.com/ramnes.png" width="60px" alt="Guillaume Gelin" /></a><a href="https://github.com/jyc"><img src="https://github.com/jyc.png" width="60px" alt="" /></a><a href="https://github.com/mrcnski"><img src="https://github.com/mrcnski.png" width="60px" alt="Marcin S." /></a><a href="https://github.com/roblevy"><img src="https://github.com/roblevy.png" width="60px" alt="Rob Levy" /></a><a href="https://github.com/warpdotdev"><img src="https://github.com/warpdotdev.png" width="60px" alt="Warp" /></a><a href="https://github.com/glozow"><img src="https://github.com/glozow.png" width="60px" alt="Gloria Zhao" /></a><a href="https://github.com/wjt"><img src="https://github.com/wjt.png" width="60px" alt="Will Thompson" /></a><a href="https://github.com/toupeira"><img src="https://github.com/toupeira.png" width="60px" alt="Markus Koller" /></a><a href="https://github.com/rkpatel33"><img src="https://github.com/rkpatel33.png" width="60px" alt="" /></a><a href="https://github.com/jamesob"><img src="https://github.com/jamesob.png" width="60px" alt="James O'Beirne" /></a><a href="https://github.com/joshuatz"><img src="https://github.com/joshuatz.png" width="60px" alt="Joshua Tzucker" /></a><a href="https://github.com/gpopides"><img src="https://github.com/gpopides.png" width="60px" alt="gpopides" /></a><a href="https://github.com/jlebray"><img src="https://github.com/jlebray.png" width="60px" alt="Johan Le Bray" /></a><!-- sponsors -->
+- **Portable** — Distributed as a single binary for easy installation
+- **Fast** — Optimized to process millions of items instantly
+- **Versatile** — Fully customizable through an event-action binding mechanism
+- **All-inclusive** — Comes with integrations for Bash, Zsh, Fish, Vim, and Neovim
 
 Table of Contents
 -----------------
@@ -53,33 +59,38 @@ Table of Contents
 
 * [Installation](#installation)
     * [Using Homebrew](#using-homebrew)
+    * [Linux packages](#linux-packages)
+    * [Windows packages](#windows-packages)
     * [Using git](#using-git)
-    * [Using Linux package managers](#using-linux-package-managers)
-    * [Windows](#windows)
+    * [Binary releases](#binary-releases)
     * [Setting up shell integration](#setting-up-shell-integration)
-    * [As Vim plugin](#as-vim-plugin)
+    * [Vim/Neovim plugin](#vimneovim-plugin)
 * [Upgrading fzf](#upgrading-fzf)
 * [Building fzf](#building-fzf)
 * [Usage](#usage)
     * [Using the finder](#using-the-finder)
-    * [Layout](#layout)
+    * [Display modes](#display-modes)
+        * [`--height` mode](#--height-mode)
+        * [`--tmux` mode](#--tmux-mode)
     * [Search syntax](#search-syntax)
     * [Environment variables](#environment-variables)
+    * [Customizing the look](#customizing-the-look)
     * [Options](#options)
     * [Demo](#demo)
 * [Examples](#examples)
-* [`fzf-tmux` script](#fzf-tmux-script)
 * [Key bindings for command-line](#key-bindings-for-command-line)
 * [Fuzzy completion for bash and zsh](#fuzzy-completion-for-bash-and-zsh)
     * [Files and directories](#files-and-directories)
     * [Process IDs](#process-ids)
     * [Host names](#host-names)
     * [Environment variables / Aliases](#environment-variables--aliases)
-    * [Settings](#settings)
+    * [Customizing fzf options for completion](#customizing-fzf-options-for-completion)
+    * [Customizing completion source for paths and directories](#customizing-completion-source-for-paths-and-directories)
     * [Supported commands](#supported-commands)
     * [Custom fuzzy completion](#custom-fuzzy-completion)
 * [Vim plugin](#vim-plugin)
 * [Advanced topics](#advanced-topics)
+    * [Customizing for different types of input](#customizing-for-different-types-of-input)
     * [Performance](#performance)
     * [Executing external programs](#executing-external-programs)
     * [Turning into a different process](#turning-into-a-different-process)
@@ -95,34 +106,19 @@ Table of Contents
     * [fzf Theme Playground](#fzf-theme-playground)
 * [Related projects](#related-projects)
 * [License](#license)
+* [Sponsors :heart:](#sponsors-heart)
 
 <!-- vim-markdown-toc -->
 
 Installation
 ------------
 
-fzf project consists of the following components:
-
-- `fzf` executable
-- `fzf-tmux` script for launching fzf in a tmux pane
-- Shell integration
-    - Key bindings (`CTRL-T`, `CTRL-R`, and `ALT-C`) (bash, zsh, fish)
-    - Fuzzy completion (bash, zsh)
-- Vim/Neovim plugin
-
-You can [download fzf executable][bin] alone if you don't need the extra
-stuff.
-
-[bin]: https://github.com/junegunn/fzf/releases
-
 ### Using Homebrew
 
-You can use [Homebrew](https://brew.sh/) (on macOS or Linux)
-to install fzf.
+You can use [Homebrew](https://brew.sh/) (on macOS or Linux) to install fzf.
 
 ```sh
 brew install fzf
-  # To build fzf from the latest source: brew install --HEAD fzf
 ```
 
 > [!IMPORTANT]
@@ -133,20 +129,7 @@ fzf is also available [via MacPorts][portfile]: `sudo port install fzf`
 
 [portfile]: https://github.com/macports/macports-ports/blob/master/sysutils/fzf/Portfile
 
-### Using git
-
-Alternatively, you can "git clone" this repository to any directory and run
-[install](https://github.com/junegunn/fzf/blob/master/install) script.
-
-```sh
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install
-```
-
-The install script will add lines to your shell configuration file to modify
-`$PATH` and set up shell integration.
-
-### Using Linux package managers
+### Linux packages
 
 | Package Manager | Linux Distribution      | Command                            |
 | --------------- | ----------------------- | ---------------------------------- |
@@ -168,12 +151,12 @@ The install script will add lines to your shell configuration file to modify
 > To set up shell integration (key bindings and fuzzy completion),
 > see [the instructions below](#setting-up-shell-integration).
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/fzf.svg)](https://repology.org/project/fzf/versions)
+[![Packaging status](https://repology.org/badge/vertical-allrepos/fzf.svg?columns=3)](https://repology.org/project/fzf/versions)
 
-### Windows
+### Windows packages
 
-Pre-built binaries for Windows can be downloaded [here][bin]. fzf is also
-available via [Chocolatey][choco], [Scoop][scoop], [Winget][winget], and [MSYS2][msys2]:
+On Windows, fzf is available via [Chocolatey][choco], [Scoop][scoop],
+[Winget][winget], and [MSYS2][msys2]:
 
 | Package manager | Command                               |
 | --------------- | ------------------------------------- |
@@ -187,10 +170,24 @@ available via [Chocolatey][choco], [Scoop][scoop], [Winget][winget], and [MSYS2]
 [winget]: https://github.com/microsoft/winget-pkgs/tree/master/manifests/j/junegunn/fzf
 [msys2]: https://packages.msys2.org/base/mingw-w64-fzf
 
-Known issues and limitations on Windows can be found on [the wiki
-page][windows-wiki].
+### Using git
 
-[windows-wiki]: https://github.com/junegunn/fzf/wiki/Windows
+Alternatively, you can "git clone" this repository to any directory and run
+[install](https://github.com/junegunn/fzf/blob/master/install) script.
+
+```sh
+git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+~/.fzf/install
+```
+
+The install script will add lines to your shell configuration file to modify
+`$PATH` and set up shell integration.
+
+### Binary releases
+
+You can download the official fzf binaries from the releases page.
+
+* https://github.com/junegunn/fzf/releases
 
 ### Setting up shell integration
 
@@ -204,7 +201,7 @@ Add the following line to your shell configuration file.
 * zsh
   ```sh
   # Set up fzf key bindings and fuzzy completion
-  eval "$(fzf --zsh)"
+  source <(fzf --zsh)
   ```
 * fish
   ```fish
@@ -221,30 +218,36 @@ Add the following line to your shell configuration file.
 > (e.g. `apt show fzf`)
 
 > [!TIP]
-> You can disable CTRL-T or ALT-C binding by setting `FZF_CTRL_T_COMMAND` or
-> `FZF_ALT_C_COMMAND` to an empty string when sourcing the script.
-> For example, to disable ALT-C binding:
+> You can disable CTRL-T, CTRL-R, or ALT-C bindings by setting the
+> corresponding `*_COMMAND` variable to an empty string when sourcing the
+> script. For example, to disable CTRL-R and ALT-C:
 >
-> * bash: `FZF_ALT_C_COMMAND= eval "$(fzf --bash)"`
-> * zsh: `FZF_ALT_C_COMMAND= eval "$(fzf --zsh)"`
-> * fish: `fzf --fish | FZF_ALT_C_COMMAND= source`
+> * bash: `FZF_CTRL_R_COMMAND= FZF_ALT_C_COMMAND= eval "$(fzf --bash)"`
+> * zsh: `FZF_CTRL_R_COMMAND= FZF_ALT_C_COMMAND= source <(fzf --zsh)`
+> * fish: `fzf --fish | FZF_CTRL_R_COMMAND= FZF_ALT_C_COMMAND= source`
 >
 > Setting the variables after sourcing the script will have no effect.
 
-### As Vim plugin
+### Vim/Neovim plugin
 
-If you use
-[vim-plug](https://github.com/junegunn/vim-plug), add this line to your Vim
-configuration file:
+If you use [vim-plug](https://github.com/junegunn/vim-plug), add this to
+your Vim configuration file:
 
 ```vim
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 ```
 
-`fzf#install()` makes sure that you have the latest binary, but it's optional,
-so you can omit it if you use a plugin manager that doesn't support hooks.
+* `junegunn/fzf` provides the basic library functions
+    * `fzf#install()` makes sure that you have the latest binary
+* `junegunn/fzf.vim` is [a separate project](https://github.com/junegunn/fzf.vim)
+  that provides a variety of useful commands
 
-For more installation options, see [README-VIM.md](README-VIM.md).
+To learn more about the Vim integration, see [README-VIM.md](README-VIM.md).
+
+> [!TIP]
+> If you use Neovim and prefer Lua-based plugins, check out
+> [fzf-lua](https://github.com/ibhagwan/fzf-lua).
 
 Upgrading fzf
 -------------
@@ -312,28 +315,70 @@ vim $(fzf)
 - Mouse: scroll, click, double-click; shift-click and shift-scroll on
   multi-select mode
 
-### Layout
+### Display modes
 
-fzf by default starts in fullscreen mode, but you can make it start below the
-cursor with `--height` option.
+fzf by default runs in fullscreen mode, but there are other display modes.
 
-```sh
-vim $(fzf --height 40%)
-```
+#### `--height` mode
 
-Also, check out `--reverse` and `--layout` options if you prefer
-"top-down" layout instead of the default "bottom-up" layout.
+With `--height HEIGHT[%]`, fzf will start below the cursor with the given height.
 
 ```sh
-vim $(fzf --height 40% --reverse)
+fzf --height 40%
 ```
 
-You can add these options to `$FZF_DEFAULT_OPTS` so that they're applied by
-default. For example,
+`reverse` layout and `--border` goes well with this option.
 
 ```sh
-export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+fzf --height 40% --layout reverse --border
 ```
+
+By prepending `~` to the height, you're setting the maximum height.
+
+```sh
+# Will take as few lines as possible to display the list
+seq 3 | fzf --height ~100%
+seq 3000 | fzf --height ~100%
+```
+
+Height value can be a negative number.
+
+```sh
+# Screen height - 3
+fzf --height -3
+```
+
+#### `--tmux` mode
+
+With `--tmux` option, fzf will start in a tmux popup.
+
+```sh
+# --tmux [center|top|bottom|left|right][,SIZE[%]][,SIZE[%][,border-native]]
+
+fzf --tmux center         # Center, 50% width and height
+fzf --tmux 80%            # Center, 80% width and height
+fzf --tmux 100%,50%       # Center, 100% width and 50% height
+fzf --tmux left,40%       # Left, 40% width
+fzf --tmux left,40%,90%   # Left, 40% width, 90% height
+fzf --tmux top,40%        # Top, 40% height
+fzf --tmux bottom,80%,40% # Bottom, 80% width, 40% height
+```
+
+`--tmux` is silently ignored when you're not on tmux.
+
+> [!NOTE]
+> If you're stuck with an old version of tmux that doesn't support popup,
+> or if you want to open fzf in a regular tmux pane, check out
+> [fzf-tmux](bin/fzf-tmux) script.
+
+> [!TIP]
+> You can add these options to `$FZF_DEFAULT_OPTS` so that they're applied by
+> default. For example,
+>
+> ```sh
+> # Open in tmux popup if on tmux, otherwise use --height mode
+> export FZF_DEFAULT_OPTS='--height 40% --tmux bottom,40% --layout reverse --border top'
+> ```
 
 ### Search syntax
 
@@ -341,15 +386,16 @@ Unless otherwise specified, fzf starts in "extended-search mode" where you can
 type in multiple search terms delimited by spaces. e.g. `^music .mp3$ sbtrkt
 !fire`
 
-| Token     | Match type                 | Description                          |
-| --------- | -------------------------- | ------------------------------------ |
-| `sbtrkt`  | fuzzy-match                | Items that match `sbtrkt`            |
-| `'wild`   | exact-match (quoted)       | Items that include `wild`            |
-| `^music`  | prefix-exact-match         | Items that start with `music`        |
-| `.mp3$`   | suffix-exact-match         | Items that end with `.mp3`           |
-| `!fire`   | inverse-exact-match        | Items that do not include `fire`     |
-| `!^music` | inverse-prefix-exact-match | Items that do not start with `music` |
-| `!.mp3$`  | inverse-suffix-exact-match | Items that do not end with `.mp3`    |
+| Token     | Match type                              | Description                                  |
+| --------- | --------------------------------------  | ------------------------------------------   |
+| `sbtrkt`  | fuzzy-match                             | Items that match `sbtrkt`                    |
+| `'wild`   | exact-match (quoted)                    | Items that include `wild`                    |
+| `'wild'`  | exact-boundary-match (quoted both ends) | Items that include `wild` at word boundaries |
+| `^music`  | prefix-exact-match                      | Items that start with `music`                |
+| `.mp3$`   | suffix-exact-match                      | Items that end with `.mp3`                   |
+| `!fire`   | inverse-exact-match                     | Items that do not include `fire`             |
+| `!^music` | inverse-prefix-exact-match              | Items that do not start with `music`         |
+| `!.mp3$`  | inverse-suffix-exact-match              | Items that do not end with `.mp3`            |
 
 If you don't prefer fuzzy matching and do not wish to "quote" every word,
 start fzf with `-e` or `--exact` option. Note that when  `--exact` is set,
@@ -387,9 +433,56 @@ or `py`.
 >
 > The available options are described later in this document.
 
+### Customizing the look
+
+The user interface of fzf is fully customizable with a large number of
+configuration options. For a quick setup, you can start with one of the style
+presets — `default`, `full`, or `minimal` — using the `--style` option.
+
+```sh
+fzf --style full \
+    --preview 'fzf-preview.sh {}' --bind 'focus:transform-header:file --brief {}'
+```
+
+| Preset    | Screenshot                                                                             |
+| :---      | :---                                                                                   |
+| `default` | <img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-style-default.png"/> |
+| `full`    | <img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-style-full.png"/>    |
+| `minimal` | <img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-style-minimal.png"/> |
+
+Here's an example based on the `full` preset:
+
+<img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-4-borders.png"/>
+
+<details>
+
+```sh
+git ls-files | fzf --style full \
+    --border --padding 1,2 \
+    --border-label ' Demo ' --input-label ' Input ' --header-label ' File Type ' \
+    --preview 'fzf-preview.sh {}' \
+    --bind 'result:transform-list-label:
+        if [[ -z $FZF_QUERY ]]; then
+          echo " $FZF_MATCH_COUNT items "
+        else
+          echo " $FZF_MATCH_COUNT matches for [$FZF_QUERY] "
+        fi
+        ' \
+    --bind 'focus:transform-preview-label:[[ -n {} ]] && printf " Previewing [%s] " {}' \
+    --bind 'focus:+transform-header:file --brief {} || echo "No file selected"' \
+    --bind 'ctrl-r:change-list-label( Reloading the list )+reload(sleep 2; git ls-files)' \
+    --color 'border:#aaaaaa,label:#cccccc' \
+    --color 'preview-border:#9999cc,preview-label:#ccccff' \
+    --color 'list-border:#669966,list-label:#99cc99' \
+    --color 'input-border:#996666,input-label:#ffcccc' \
+    --color 'header-border:#6699cc,header-label:#99ccff'
+```
+
+</details>
+
 ### Options
 
-See the man page (`man fzf`) for the full list of options.
+See the man page (`fzf --man` or `man fzf`) for the full list of options.
 
 ### Demo
 If you learn by watching videos, check out this screencast by [@samoshkin](https://github.com/samoshkin) to explore `fzf` features.
@@ -406,39 +499,11 @@ Examples
       and are not thoroughly tested*
 * [Advanced fzf examples](https://github.com/junegunn/fzf/blob/master/ADVANCED.md)
 
-`fzf-tmux` script
------------------
-
-[fzf-tmux](bin/fzf-tmux) is a bash script that opens fzf in a tmux pane.
-
-```sh
-# usage: fzf-tmux [LAYOUT OPTIONS] [--] [FZF OPTIONS]
-
-# See available options
-fzf-tmux --help
-
-# select git branches in horizontal split below (15 lines)
-git branch | fzf-tmux -d 15
-
-# select multiple words in vertical split on the left (20% of screen width)
-cat /usr/share/dict/words | fzf-tmux -l 20% --multi --reverse
-```
-
-It will still work even when you're not on tmux, silently ignoring `-[pudlr]`
-options, so you can invariably use `fzf-tmux` in your scripts.
-
-Alternatively, you can use `--height HEIGHT[%]` option not to start fzf in
-fullscreen mode.
-
-```sh
-fzf --height 40%
-```
-
 Key bindings for command-line
 -----------------------------
 
-The install script will setup the following key bindings for bash, zsh, and
-fish.
+By [setting up shell integration](#setting-up-shell-integration), you can use
+the following key bindings in bash, zsh, and fish.
 
 - `CTRL-T` - Paste the selected files and directories onto the command-line
     - The list is generated using `--walker file,dir,follow,hidden` option
@@ -457,17 +522,21 @@ fish.
 - `CTRL-R` - Paste the selected command from history onto the command-line
     - If you want to see the commands in chronological order, press `CTRL-R`
       again which toggles sorting by relevance
+    - Press `ALT-R` to toggle "raw" mode where you can see the surrounding items
+      of a match. In this mode, you can press `CTRL-N` and `CTRL-P` to move
+      between the matching items only.
+    - Press `CTRL-/` or `ALT-/` to toggle line wrapping
     - Set `FZF_CTRL_R_OPTS` to pass additional options to fzf
       ```sh
-      # CTRL-/ to toggle small preview window to see the full command
       # CTRL-Y to copy the command into clipboard using pbcopy
       export FZF_CTRL_R_OPTS="
-        --preview 'echo {}' --preview-window up:3:hidden:wrap
-        --bind 'ctrl-/:toggle-preview'
         --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
         --color header:italic
         --header 'Press CTRL-Y to copy command into clipboard'"
       ```
+    - Can be disabled by setting `FZF_CTRL_R_COMMAND` to an empty string when
+      sourcing the script
+    - Custom override via a non-empty `FZF_CTRL_R_COMMAND` is not yet supported and will emit a warning
 - `ALT-C` - cd into the selected directory
     - The list is generated using `--walker dir,follow,hidden` option
     - Set `FZF_ALT_C_COMMAND` to override the default command
@@ -482,9 +551,9 @@ fish.
     - Can be disabled by setting `FZF_ALT_C_COMMAND` to an empty string when
       sourcing the script
 
-If you're on a tmux session, you can start fzf in a tmux split-pane or in
-a tmux popup window by setting `FZF_TMUX_OPTS` (e.g. `export FZF_TMUX_OPTS='-p80%,60%'`).
-See `fzf-tmux --help` for available options.
+Display modes for these bindings can be separately configured via
+`FZF_{CTRL_T,CTRL_R,ALT_C}_OPTS` or globally via `FZF_DEFAULT_OPTS`.
+(e.g. `FZF_CTRL_R_OPTS='--tmux bottom,60% --height 60% --border top'`)
 
 More tips can be found on [the wiki page](https://github.com/junegunn/fzf/wiki/Configuring-shell-key-bindings).
 
@@ -547,7 +616,7 @@ export **<TAB>
 unalias **<TAB>
 ```
 
-### Settings
+### Customizing fzf options for completion
 
 ```sh
 # Use ~~ as the trigger sequence instead of the default **
@@ -556,21 +625,15 @@ export FZF_COMPLETION_TRIGGER='~~'
 # Options to fzf command
 export FZF_COMPLETION_OPTS='--border --info=inline'
 
-# Use fd (https://github.com/sharkdp/fd) for listing path candidates.
-# - The first argument to the function ($1) is the base path to start traversal
-# - See the source code (completion.{bash,zsh}) for the details.
-_fzf_compgen_path() {
-  fd --hidden --follow --exclude ".git" . "$1"
-}
+# Options for path completion (e.g. vim **<TAB>)
+export FZF_COMPLETION_PATH_OPTS='--walker file,dir,follow,hidden'
 
-# Use fd to generate the list for directory completion
-_fzf_compgen_dir() {
-  fd --type d --hidden --follow --exclude ".git" . "$1"
-}
+# Options for directory completion (e.g. cd **<TAB>)
+export FZF_COMPLETION_DIR_OPTS='--walker dir,follow'
 
 # Advanced customization of fzf options via _fzf_comprun function
 # - The first argument to the function is the name of the command.
-# - You should make sure to pass the rest of the arguments to fzf.
+# - You should make sure to pass the rest of the arguments ($@) to fzf.
 _fzf_comprun() {
   local command=$1
   shift
@@ -581,6 +644,22 @@ _fzf_comprun() {
     ssh)          fzf --preview 'dig {}'                   "$@" ;;
     *)            fzf --preview 'bat -n --color=always {}' "$@" ;;
   esac
+}
+```
+
+### Customizing completion source for paths and directories
+
+```sh
+# Use fd (https://github.com/sharkdp/fd) for listing path candidates.
+# - The first argument to the function ($1) is the base path to start traversal
+# - See the source code (completion.{bash,zsh}) for the details.
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+# Use fd to generate the list for directory completion
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
 }
 ```
 
@@ -654,6 +733,22 @@ See [README-VIM.md](README-VIM.md).
 Advanced topics
 ---------------
 
+### Customizing for different types of input
+
+Since fzf is a general-purpose text filter, its algorithm was designed to
+"generally" work well with any kind of input. However, admittedly, there is no
+true one-size-fits-all solution, and you may want to tweak the algorithm and
+some of the settings depending on the type of the input. To make this process
+easier, fzf provides a set of "scheme"s for some common input types.
+
+| Scheme             | Description                                                                         |
+| :---               | :---                                                                                |
+| `--scheme=default` | Generic scheme designed to work well with any kind of input                         |
+| `--scheme=path`    | Suitable for file paths                                                             |
+| `--scheme=history` | Suitable for command history or any input where chronological ordering is important |
+
+(See `fzf --man` for the details)
+
 ### Performance
 
 fzf is fast. Performance should not be a problem in most use cases. However,
@@ -663,6 +758,8 @@ you might want to be aware of the options that can affect performance.
   makes the initial scanning slower. So it's not recommended that you add it
   to your `$FZF_DEFAULT_OPTS`.
 - `--nth` makes fzf slower because it has to tokenize each line.
+- A plain string `--delimiter` should be preferred over a regular expression
+  delimiter.
 - `--with-nth` makes fzf slower as fzf has to tokenize and reassemble each
   line.
 
@@ -677,7 +774,7 @@ fzf (`execute`, `execute-silent`).
 fzf --bind 'f1:execute(less -f {}),ctrl-y:execute-silent(echo {} | pbcopy)+abort'
 ```
 
-See *KEY BINDINGS* section of the man page for details.
+See *KEY/EVENT BINDINGS* section of the man page for details.
 
 ### Turning into a different process
 
@@ -900,4 +997,13 @@ https://github.com/junegunn/fzf/wiki/Related-projects
 
 The MIT License (MIT)
 
-Copyright (c) 2013-2024 Junegunn Choi
+Copyright (c) 2013-2025 Junegunn Choi
+
+Sponsors :heart:
+----------------
+
+I would like to thank all the sponsors of this project who make it possible for me to continue to improve fzf.
+
+If you'd like to sponsor this project, please visit https://github.com/sponsors/junegunn.
+
+<!-- sponsors --><a href="https://github.com/miyanokomiya"><img src="https:&#x2F;&#x2F;github.com&#x2F;miyanokomiya.png" width="60px" alt="User avatar: miyanokomiya" /></a><a href="https://github.com/AceofSpades5757"><img src="https:&#x2F;&#x2F;github.com&#x2F;AceofSpades5757.png" width="60px" alt="User avatar: Kyle L. Davis" /></a><a href="https://github.com/Frederick888"><img src="https:&#x2F;&#x2F;github.com&#x2F;Frederick888.png" width="60px" alt="User avatar: Frederick Zhang" /></a><a href="https://github.com/moritzdietz"><img src="https:&#x2F;&#x2F;github.com&#x2F;moritzdietz.png" width="60px" alt="User avatar: Moritz Dietz" /></a><a href="https://github.com/pldubouilh"><img src="https:&#x2F;&#x2F;github.com&#x2F;pldubouilh.png" width="60px" alt="User avatar: Pierre Dubouilh" /></a><a href="https://github.com/trantor"><img src="https:&#x2F;&#x2F;github.com&#x2F;trantor.png" width="60px" alt="User avatar: Fulvio Scapin" /></a><a href="https://github.com/rcorre"><img src="https:&#x2F;&#x2F;github.com&#x2F;rcorre.png" width="60px" alt="User avatar: Ryan Roden-Corrent" /></a><a href="https://github.com/blissdev"><img src="https:&#x2F;&#x2F;github.com&#x2F;blissdev.png" width="60px" alt="User avatar: Jordan Arentsen" /></a><a href="https://github.com/aexvir"><img src="https:&#x2F;&#x2F;github.com&#x2F;aexvir.png" width="60px" alt="User avatar: Alex Viscreanu" /></a><a href="https://github.com/moobar"><img src="https:&#x2F;&#x2F;github.com&#x2F;moobar.png" width="60px" alt="User avatar: " /></a><a href="https://github.com/benelan"><img src="https:&#x2F;&#x2F;github.com&#x2F;benelan.png" width="60px" alt="User avatar: Ben Elan" /></a><a href="https://github.com/pawelduda"><img src="https:&#x2F;&#x2F;github.com&#x2F;pawelduda.png" width="60px" alt="User avatar: Paweł Kolonko-Duda" /></a><a href="https://github.com/mckellygit"><img src="https:&#x2F;&#x2F;github.com&#x2F;mckellygit.png" width="60px" alt="User avatar: M Kelly" /></a><a href="https://github.com/ArtBIT"><img src="https:&#x2F;&#x2F;github.com&#x2F;ArtBIT.png" width="60px" alt="User avatar: ArtBIT" /></a><a href="https://github.com/da-moon"><img src="https:&#x2F;&#x2F;github.com&#x2F;da-moon.png" width="60px" alt="User avatar: " /></a><a href="https://github.com/hovissimo"><img src="https:&#x2F;&#x2F;github.com&#x2F;hovissimo.png" width="60px" alt="User avatar: Hovis" /></a><a href="https://github.com/cristiand391"><img src="https:&#x2F;&#x2F;github.com&#x2F;cristiand391.png" width="60px" alt="User avatar: Cristian Dominguez" /></a><a href="https://github.com/eliangcs"><img src="https:&#x2F;&#x2F;github.com&#x2F;eliangcs.png" width="60px" alt="User avatar: Chang-Hung Liang" /></a><a href="https://github.com/asphaltbuffet"><img src="https:&#x2F;&#x2F;github.com&#x2F;asphaltbuffet.png" width="60px" alt="User avatar: Ben Lechlitner" /></a><a href="https://github.com/looshch"><img src="https:&#x2F;&#x2F;github.com&#x2F;looshch.png" width="60px" alt="User avatar: george looshch" /></a><a href="https://github.com/kg8m"><img src="https:&#x2F;&#x2F;github.com&#x2F;kg8m.png" width="60px" alt="User avatar: Takumi KAGIYAMA" /></a><a href="https://github.com/polm"><img src="https:&#x2F;&#x2F;github.com&#x2F;polm.png" width="60px" alt="User avatar: Paul OLeary McCann" /></a><a href="https://github.com/rbeeger"><img src="https:&#x2F;&#x2F;github.com&#x2F;rbeeger.png" width="60px" alt="User avatar: Robert Beeger" /></a><a href="https://github.com/scalisi"><img src="https:&#x2F;&#x2F;github.com&#x2F;scalisi.png" width="60px" alt="User avatar: Josh Scalisi" /></a><a href="https://github.com/alecbcs"><img src="https:&#x2F;&#x2F;github.com&#x2F;alecbcs.png" width="60px" alt="User avatar: Alec Scott" /></a><a href="https://github.com/artursapek"><img src="https:&#x2F;&#x2F;github.com&#x2F;artursapek.png" width="60px" alt="User avatar: Artur Sapek" /></a><a href="https://github.com/ramnes"><img src="https:&#x2F;&#x2F;github.com&#x2F;ramnes.png" width="60px" alt="User avatar: Guillaume Gelin" /></a><a href="https://github.com/jyc"><img src="https:&#x2F;&#x2F;github.com&#x2F;jyc.png" width="60px" alt="User avatar: " /></a><a href="https://github.com/roblevy"><img src="https:&#x2F;&#x2F;github.com&#x2F;roblevy.png" width="60px" alt="User avatar: Rob Levy" /></a><a href="https://github.com/toupeira"><img src="https:&#x2F;&#x2F;github.com&#x2F;toupeira.png" width="60px" alt="User avatar: Markus Koller" /></a><a href="https://github.com/rkpatel33"><img src="https:&#x2F;&#x2F;github.com&#x2F;rkpatel33.png" width="60px" alt="User avatar: " /></a><a href="https://github.com/jamesob"><img src="https:&#x2F;&#x2F;github.com&#x2F;jamesob.png" width="60px" alt="User avatar: jamesob" /></a><a href="https://github.com/jlebray"><img src="https:&#x2F;&#x2F;github.com&#x2F;jlebray.png" width="60px" alt="User avatar: Johan Le Bray" /></a><a href="https://github.com/panosl1"><img src="https:&#x2F;&#x2F;github.com&#x2F;panosl1.png" width="60px" alt="User avatar: Panos Lampropoulos" /></a><a href="https://github.com/bespinian"><img src="https:&#x2F;&#x2F;github.com&#x2F;bespinian.png" width="60px" alt="User avatar: bespinian" /></a><a href="https://github.com/scosu"><img src="https:&#x2F;&#x2F;github.com&#x2F;scosu.png" width="60px" alt="User avatar: Markus Schneider-Pargmann" /></a><a href="https://github.com/smithbm2316"><img src="https:&#x2F;&#x2F;github.com&#x2F;smithbm2316.png" width="60px" alt="User avatar: Ben Smith" /></a><a href="https://github.com/charlieegan3"><img src="https:&#x2F;&#x2F;github.com&#x2F;charlieegan3.png" width="60px" alt="User avatar: Charlie Egan" /></a><a href="https://github.com/thobbs"><img src="https:&#x2F;&#x2F;github.com&#x2F;thobbs.png" width="60px" alt="User avatar: Tyler Hobbs" /></a><a href="https://github.com/neilparikh"><img src="https:&#x2F;&#x2F;github.com&#x2F;neilparikh.png" width="60px" alt="User avatar: Neil Parikh" /></a><a href="https://github.com/shkm"><img src="https:&#x2F;&#x2F;github.com&#x2F;shkm.png" width="60px" alt="User avatar: Jamie Schembri" /></a><a href="https://github.com/BasedScience"><img src="https:&#x2F;&#x2F;github.com&#x2F;BasedScience.png" width="60px" alt="User avatar: dockien" /></a><a href="https://github.com/RussellGilmore"><img src="https:&#x2F;&#x2F;github.com&#x2F;RussellGilmore.png" width="60px" alt="User avatar: Russell Gilmore" /></a><a href="https://github.com/meribold"><img src="https:&#x2F;&#x2F;github.com&#x2F;meribold.png" width="60px" alt="User avatar: Lukas Waymann" /></a><a href="https://github.com/terminaldweller"><img src="https:&#x2F;&#x2F;github.com&#x2F;terminaldweller.png" width="60px" alt="User avatar: Farzad Sadeghi" /></a><a href="https://github.com/jaydee-coder"><img src="https:&#x2F;&#x2F;github.com&#x2F;jaydee-coder.png" width="60px" alt="User avatar: " /></a><a href="https://github.com/brpaz"><img src="https:&#x2F;&#x2F;github.com&#x2F;brpaz.png" width="60px" alt="User avatar: Bruno Paz" /></a><a href="https://github.com/timobenn"><img src="https:&#x2F;&#x2F;github.com&#x2F;timobenn.png" width="60px" alt="User avatar: Timothy Bennett" /></a><a href="https://github.com/danhorner"><img src="https:&#x2F;&#x2F;github.com&#x2F;danhorner.png" width="60px" alt="User avatar: Daniel Horner" /></a><a href="https://github.com/syeo66"><img src="https:&#x2F;&#x2F;github.com&#x2F;syeo66.png" width="60px" alt="User avatar: Red Ochsenbein" /></a><a href="https://github.com/nekhaevskiy"><img src="https:&#x2F;&#x2F;github.com&#x2F;nekhaevskiy.png" width="60px" alt="User avatar: Yury" /></a><a href="https://github.com/lajarre"><img src="https:&#x2F;&#x2F;github.com&#x2F;lajarre.png" width="60px" alt="User avatar: " /></a><a href="https://github.com/NightsPaladin"><img src="https:&#x2F;&#x2F;github.com&#x2F;NightsPaladin.png" width="60px" alt="User avatar: Chris G." /></a><a href="https://github.com/lzell"><img src="https:&#x2F;&#x2F;github.com&#x2F;lzell.png" width="60px" alt="User avatar: Lou Zell" /></a><a href="https://github.com/3ximus"><img src="https:&#x2F;&#x2F;github.com&#x2F;3ximus.png" width="60px" alt="User avatar: Fabio" /></a><a href="https://github.com/justinlubin"><img src="https:&#x2F;&#x2F;github.com&#x2F;justinlubin.png" width="60px" alt="User avatar: Justin Lubin" /></a><a href="https://github.com/mieubrisse"><img src="https:&#x2F;&#x2F;github.com&#x2F;mieubrisse.png" width="60px" alt="User avatar: Kevin Today" /></a><a href="https://github.com/coko7"><img src="https:&#x2F;&#x2F;github.com&#x2F;coko7.png" width="60px" alt="User avatar: Coko" /></a><a href="https://github.com/neogeographica"><img src="https:&#x2F;&#x2F;github.com&#x2F;neogeographica.png" width="60px" alt="User avatar: Joel B" /></a><a href="https://github.com/fabridamicelli"><img src="https:&#x2F;&#x2F;github.com&#x2F;fabridamicelli.png" width="60px" alt="User avatar: Fabrizio Damicelli" /></a><a href="https://github.com/petercool"><img src="https:&#x2F;&#x2F;github.com&#x2F;petercool.png" width="60px" alt="User avatar: Sonami" /></a><a href="https://github.com/jksolbakken"><img src="https:&#x2F;&#x2F;github.com&#x2F;jksolbakken.png" width="60px" alt="User avatar: Jan-Kåre Solbakken" /></a><a href="https://github.com/Trash-Nothing"><img src="https:&#x2F;&#x2F;github.com&#x2F;Trash-Nothing.png" width="60px" alt="User avatar: Trash Nothing" /></a><a href="https://github.com/PairWithTuple"><img src="https:&#x2F;&#x2F;github.com&#x2F;PairWithTuple.png" width="60px" alt="User avatar: Tuple" /></a><a href="https://github.com/justrajdeep"><img src="https:&#x2F;&#x2F;github.com&#x2F;justrajdeep.png" width="60px" alt="User avatar: " /></a><a href="https://github.com/jpc"><img src="https:&#x2F;&#x2F;github.com&#x2F;jpc.png" width="60px" alt="User avatar: Jakub Piotr Cłapa" /></a><a href="https://github.com/dasdy"><img src="https:&#x2F;&#x2F;github.com&#x2F;dasdy.png" width="60px" alt="User avatar: Oleksandr Podze" /></a><a href="https://github.com/DANIII3L"><img src="https:&#x2F;&#x2F;github.com&#x2F;DANIII3L.png" width="60px" alt="User avatar: DANIII3L" /></a><a href="https://github.com/beyondcompute"><img src="https:&#x2F;&#x2F;github.com&#x2F;beyondcompute.png" width="60px" alt="User avatar: Evgeny Kulikov" /></a><!-- sponsors -->

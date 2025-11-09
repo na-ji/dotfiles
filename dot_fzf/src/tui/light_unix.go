@@ -18,7 +18,7 @@ func IsLightRendererSupported() bool {
 	return true
 }
 
-func (r *LightRenderer) defaultTheme() *ColorTheme {
+func (r *LightRenderer) DefaultTheme() *ColorTheme {
 	if strings.Contains(os.Getenv("TERM"), "256") {
 		return Dark256
 	}
@@ -33,33 +33,44 @@ func (r *LightRenderer) fd() int {
 	return int(r.ttyin.Fd())
 }
 
-func (r *LightRenderer) initPlatform() error {
-	fd := r.fd()
-	origState, err := term.GetState(fd)
-	if err != nil {
-		return err
-	}
-	r.origState = origState
-	term.MakeRaw(fd)
-	return nil
+func (r *LightRenderer) initPlatform() (err error) {
+	r.origState, err = term.MakeRaw(r.fd())
+	return err
 }
 
 func (r *LightRenderer) closePlatform() {
-	// NOOP
+	r.ttyout.Close()
 }
 
-func openTtyIn() (*os.File, error) {
-	in, err := os.OpenFile(consoleDevice, syscall.O_RDONLY, 0)
-	if err != nil {
+func openTty(ttyDefault string, mode int) (*os.File, error) {
+	var in *os.File
+	var err error
+	if len(ttyDefault) > 0 {
+		in, err = os.OpenFile(ttyDefault, mode, 0)
+	}
+	if in == nil || err != nil || ttyDefault != DefaultTtyDevice && !util.IsTty(in) {
 		tty := ttyname()
 		if len(tty) > 0 {
-			if in, err := os.OpenFile(tty, syscall.O_RDONLY, 0); err == nil {
+			if in, err := os.OpenFile(tty, mode, 0); err == nil {
 				return in, nil
 			}
 		}
-		return nil, errors.New("failed to open " + consoleDevice)
+		if ttyDefault != DefaultTtyDevice {
+			if in, err = os.OpenFile(DefaultTtyDevice, mode, 0); err == nil {
+				return in, nil
+			}
+		}
+		return nil, errors.New("failed to open " + DefaultTtyDevice)
 	}
 	return in, nil
+}
+
+func openTtyIn(ttyDefault string) (*os.File, error) {
+	return openTty(ttyDefault, syscall.O_RDONLY)
+}
+
+func openTtyOut(ttyDefault string) (*os.File, error) {
+	return openTty(ttyDefault, syscall.O_WRONLY)
 }
 
 func (r *LightRenderer) setupTerminal() {

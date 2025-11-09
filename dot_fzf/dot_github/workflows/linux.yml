@@ -1,5 +1,5 @@
 ---
-name: Test fzf on Linux
+name: build
 
 on:
   push:
@@ -16,36 +16,33 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
-        go-version: "1.20"
+        go-version: "1.23"
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.1.0
+        ruby-version: 3.4.6
 
     - name: Install packages
-      run: sudo apt-get install --yes zsh fish tmux
+      run: sudo apt-get install --yes zsh fish tmux shfmt
 
     - name: Install Ruby gems
-      run: sudo gem install --no-document minitest:5.17.0 rubocop:1.43.0 rubocop-minitest:0.25.1 rubocop-performance:1.15.2
+      run: bundle install
 
     - name: Rubocop
-      run: rubocop --require rubocop-minitest --require rubocop-performance
+      run: make lint
 
     - name: Unit test
       run: make test
 
     - name: Integration test
-      run: make install && ./install --all && tmux new-session -d && ruby test/test_go.rb --verbose
-
-    - name: Integration test (tcell)
-      run: TAGS=tcell make clean install && ruby test/test_go.rb --verbose
+      run: make install && ./install --all && tmux new-session -d && ruby test/runner.rb --verbose

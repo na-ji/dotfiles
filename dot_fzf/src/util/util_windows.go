@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync/atomic"
 	"syscall"
@@ -19,6 +20,8 @@ const (
 	shellTypeCmd
 	shellTypePowerShell
 )
+
+var escapeRegex = regexp.MustCompile(`[&|<>()^%!"]`)
 
 type Executor struct {
 	shell     string
@@ -131,7 +134,9 @@ func escapeArg(s string) string {
 		b = append(b, '\\')
 	}
 	b = append(b, '"')
-	return string(b)
+	return escapeRegex.ReplaceAllStringFunc(string(b), func(match string) string {
+		return "^" + match
+	})
 }
 
 func (x *Executor) QuoteEntry(entry string) string {
@@ -152,10 +157,10 @@ func (x *Executor) QuoteEntry(entry string) string {
 		*/
 		return escapeArg(entry)
 	case shellTypePowerShell:
-		escaped := strings.Replace(entry, `"`, `\"`, -1)
-		return "'" + strings.Replace(escaped, "'", "''", -1) + "'"
+		escaped := strings.ReplaceAll(entry, `"`, `\"`)
+		return "'" + strings.ReplaceAll(escaped, "'", "''") + "'"
 	default:
-		return "'" + strings.Replace(entry, "'", "'\\''", -1) + "'"
+		return "'" + strings.ReplaceAll(entry, "'", "'\\''") + "'"
 	}
 }
 

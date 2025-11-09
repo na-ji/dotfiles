@@ -1,6 +1,1023 @@
 CHANGELOG
 =========
 
+0.66.1
+------
+- Bug fixes
+    - Fixed a bug preventing 'ctrl-h' from being bound to an action (#4556)
+    - Fixed `--no-color` / `NO_COLOR` theme (#4561)
+
+0.66.0
+------
+
+### Quick summary
+
+This version introduces many new features centered around the new "raw" mode.
+
+| Type        | Class   | Name                | Description                                        |
+| :--         | :--     | :--                 | :--                                                |
+| New         | Option  | `--raw`             | Enable raw mode by default                         |
+| New         | Option  | `--gutter CHAR`     | Set the gutter column character                    |
+| New         | Option  | `--gutter-raw CHAR` | Set the gutter column character in raw mode        |
+| Enhancement | Option  | `--listen SOCKET`   | Added support for Unix domain sockets              |
+| New         | Action  | `toggle-raw`        | Toggle raw mode                                    |
+| New         | Action  | `enable-raw`        | Enable raw mode                                    |
+| New         | Action  | `disable-raw`       | Disable raw mode                                   |
+| New         | Action  | `up-match`          | Move up to the matching item                       |
+| New         | Action  | `down-match`        | Move down to the matching item                     |
+| New         | Action  | `best`              | Move to the  matching item with the best score     |
+| New         | Color   | `nomatch`           | Color for non-matching items in raw mode           |
+| New         | Env Var | `FZF_RAW`           | Matching status in raw mode (0, 1, or undefined)   |
+| New         | Env Var | `FZF_DIRECTION`     | `up` or `down` depending on the layout             |
+| New         | Env Var | `FZF_SOCK`          | Path to the Unix domain socket fzf is listening on |
+| Enhancement | Key     | `CTRL-N`            | `down` -> `down-match`                             |
+| Enhancement | Key     | `CTRL-P`            | `up` -> `up-match`                                 |
+| Enhancement | Shell   | `CTRL-R` binding    | Toggle raw mode with `ALT-R`                       |
+| Enhancement | Shell   | `CTRL-R` binding    | Opt-out with an empty `FZF_CTRL_R_COMMAND`         |
+
+### 1. Introducing "raw" mode
+
+![](https://github.com/user-attachments/assets/9640ae11-b5f7-43fb-95f1-c29307fc17c2)
+
+This version introduces a new "raw" mode (named so because it shows the list
+"unfiltered"). In raw mode, non-matching items stay in their original positions,
+but appear dimmed. This allows you to see the surrounding items of a match and
+better understand the context of it. You can enable raw mode by default with
+`--raw`, but it's often more useful when toggled dynamically with the
+`toggle-raw` action.
+
+```sh
+tree | fzf --reverse --bind alt-r:toggle-raw
+```
+
+While non-matching items are displayed in a dimmed color, they are treated just
+like matching items, so you place the cursor on them and perform any action. If
+you prefer to navigate only through matching items, use the `down-match` and
+`up-match` actions, which are from now on bound to `CTRL-N` and `CTRL-P`
+respectively, and also to `ALT-DOWN` and `ALT-UP`.
+
+| Key        | Action       | With `--history` |
+| :--        | :--          | :--              |
+| `down`     | `down`       |                  |
+| `up`       | `up`         |                  |
+| `ctrl-j`   | `down`       |                  |
+| `ctrl-k`   | `up`         |                  |
+| `ctrl-n`   | `down-match` | `next-history`   |
+| `ctrl-p`   | `up-match`   | `prev-history`   |
+| `alt-down` | `down-match` |                  |
+| `alt-up`   | `up-match`   |                  |
+
+> [!NOTE]
+> `CTRL-N` and `CTRL-P` are bound to `next-history` and `prev-history` when
+> `--history` option is enabled, so in that case, you'll need to manually bind
+> them, or use `ALT-DOWN` and `ALT-UP` instead.
+
+> [!TIP]
+> `up-match` and `down-match` are equivalent to `up` and `down` when not in
+> raw mode, so you can safely bind them to `up` and `arrow` keys if you prefer.
+> ```sh
+> fzf --bind up:up-match,down:down-match
+> ```
+
+#### Customizing the behavior
+
+In raw mode, the input list is presented in its original order, unfiltered, and
+your cursor will not move to the matching item automatically. Here are ways to
+customize the behavior.
+
+```sh
+# When the result list is updated, move the cursor to the item with the best score
+# (assuming sorting is not disabled)
+fzf --raw --bind result:best
+
+# Move to the first matching item in the original list
+# - $FZF_RAW is set to 0 when raw mode is enabled and the current item is a non-match
+# - $FZF_DIRECTION is set to either 'up' or 'down' depending on the layout direction
+fzf --raw --bind 'result:first+transform:[[ $FZF_RAW = 0 ]] && echo $FZF_DIRECTION-match'
+```
+
+#### Customizing the look
+
+##### Gutter
+
+To make the mode visually distinct, the gutter column is rendered in a dashed
+line using `▖` character. But you can customize it with the `--gutter-raw CHAR`
+option.
+
+```sh
+# Use a thinner gutter instead of the default dashed line
+fzf --bind alt-r:toggle-raw --gutter-raw ▎
+```
+
+##### Color and style of non-matching items
+
+Non-matching items are displayed in a dimmed color by default, but you can
+change it with the `--color nomatch:...` option.
+
+```sh
+fzf --raw --color nomatch:red
+fzf --raw --color nomatch:red:dim
+fzf --raw --color nomatch:red:dim:strikethrough
+fzf --raw --color nomatch:red:dim:strikethrough:italic
+```
+
+For colored input, dimming alone may not be enough, and you may prefer to remove
+colors entirely. For that case, a new special style attribute `strip` has been
+added.
+
+```sh
+fd --color always | fzf --ansi --raw --color nomatch:dim:strip:strikethrough
+```
+
+#### Conditional actions for raw mode
+
+You may want to perform different actions depending on whether the current item
+is a match or not. For that, fzf now exports `$FZF_RAW` environment variable.
+
+It's:
+
+- Undefined if raw mode is disabled
+- `1` if the current item is a match
+- `0` otherwise
+
+```sh
+# Do not allow selecting non-matching items
+fzf --raw --bind 'enter:transform:[[ ${FZF_RAW-1} = 1 ]] && echo accept || echo bell'
+```
+
+#### Leveraging raw mode in shell integration
+
+The `CTRL-R` binding (command history) now lets you toggle raw mode with `ALT-R`.
+
+### 2. Style changes
+
+The screenshot on the right shows the updated gutter style:
+
+![](https://github.com/user-attachments/assets/8ea7b5ef-c99e-4686-905b-22eb078b700a)
+
+This version includes a few minor updates to fzf's classic visual style:
+
+- The gutter column is now narrower, rendered with the left-half block character (`▌`).
+- Markers no longer use background colors.
+- The `--color base16` theme (alias: `16`) has been updated for better compatibility with both dark and light themes.
+
+### 3. `--listen` now supports Unix domain sockets
+
+If an argument to `--listen` ends with `.sock`, fzf will listen on a Unix
+domain socket at the specified path.
+
+```sh
+fzf --listen /tmp/fzf.sock --no-tmux
+
+# GET
+curl --unix-socket /tmp/fzf.sock http
+
+# POST
+curl --unix-socket /tmp/fzf.sock http -d up
+```
+
+Note that any existing file at the given path will be removed before creating
+the socket, so avoid using an important file path.
+
+### 4. Added options
+
+#### `--gutter CHAR`
+
+The gutter column can now be customized using `--gutter CHAR` and styled with
+`--color gutter:...`. Examples:
+
+```sh
+# Right-aligned gutter
+fzf --gutter '▐'
+
+# Even thinner gutter
+fzf --gutter '▎'
+
+# Yellow checker pattern
+fzf --gutter '▚' --color gutter:yellow
+
+# Classic style
+fzf --gutter ' ' --color gutter:reverse
+```
+
+#### `--gutter-raw CHAR`
+
+As noted above, the `--gutter-raw CHAR` option was also added for customizing the gutter column in raw mode.
+
+### 5. Added actions
+
+The following actions were introduced to support working with raw mode:
+
+| Action        | Description                                                                                 |
+| :--           | :--                                                                                         |
+| `toggle-raw`  | Toggle raw mode                                                                             |
+| `enable-raw`  | Enable raw mode                                                                             |
+| `disable-raw` | Disable raw mode                                                                            |
+| `up-match`    | Move up to the matching item; identical to `up` if raw mode is disabled                     |
+| `down-match`  | Move down to the matching item; identical to `down` if raw mode is disabled                 |
+| `best`        | Move to the matching item with the best score; identical to `first` if raw mode is disabled |
+
+### 6. Added environment variables
+
+#### `$FZF_DIRECTION`
+
+`$FZF_DIRECTION` is now exported to child processes, indicating the list direction of the current layout:
+
+- `up` for the default layout
+- `down` for `reverse` or `reverse-list`
+
+This simplifies writing transform actions involving layout-dependent actions
+like `{up,down}-match`, `{up,down}-selected`, and `toggle+{up,down}`.
+
+```sh
+fzf --raw --bind 'result:first+transform:[[ $FZF_RAW = 0 ]] && echo $FZF_DIRECTION-match'
+```
+
+#### `$FZF_SOCK`
+
+When fzf is listening on a Unix domain socket using `--listen`, the path to the
+socket is exported as `$FZF_SOCK`, analogous to `$FZF_PORT` for TCP sockets.
+
+#### `$FZF_RAW`
+
+As described above, `$FZF_RAW` is now exported to child processes in raw mode,
+indicating whether the current item is a match (`1`) or not (`0`). It is not
+defined when not in raw mode.
+
+#### `$FZF_CTRL_R_COMMAND`
+
+You can opt-out `CTRL-R` binding from the shell integration by setting
+`FZF_CTRL_R_COMMAND` to an empty string. Setting it to any other value is not
+supported and will result in a warning.
+
+```sh
+# Disable the CTRL-R binding from the shell integration
+FZF_CTRL_R_COMMAND= eval "$(fzf --bash)"
+```
+
+### 7. Added key support for `--bind`
+
+Pull request [#3996](https://github.com/junegunn/fzf/pull/3996) added support
+for many additional keys for `--bind` option, such as `ctrl-backspace`.
+
+### 8. Breaking changes
+
+#### Hiding the gutter column
+
+In the previous versions, the recommended way to hide the gutter column was to
+set `--color gutter:-1`. That's because the gutter column was just a space
+character, reversed. But now that it's using a visible character (`▌`), applying
+the default color is no longer enough to hide it. Instead, you can set it to
+a space character.
+
+```sh
+# Hide the gutter column
+fzf --gutter ' '
+
+# Classic style
+fzf --gutter ' ' --color gutter:reverse
+```
+
+#### `--color` option
+
+In the previous versions, some elements had default style attributes applied and
+you would have to explicitly unset them with `regular` attribute if you wanted
+to reset them. This is no longer needed now, as the default style attributes
+are applied only when you do not specify any color or style for that element.
+
+```sh
+# No 'dim', just red and italic.
+fzf --ghost 'Type to search' --color ghost:red:italic
+```
+
+#### Compatibility changes
+
+Starting with this release, fzf is built with Go 1.23. Support for some old OS versions has been dropped.
+
+See https://go.dev/wiki/MinimumRequirements.
+
+0.65.2
+------
+- Bug fixes and improvements
+    - Fix incorrect truncation of `--info-command` with `--info=inline-right` (#4479)
+    - [install] Support old uname in macOS (#4492)
+    - [bash 3] Fix `CTRL-T` and `ALT-C` to preserve the last yank (#4496)
+    - Do not unset `FZF_DEFAULT_*` variables when using winpty (#4497) (#4400)
+    - Fix rendering of items with tabs when using a non-default ellipsis (#4505)
+- **This is the final release to support Windows 7.**
+    - Future versions will be built with the latest Go toolchain, which has dropped support for Windows 7.
+
+0.65.1
+------
+- Fixed incorrect `$FZF_CLICK_HEADER_WORD` and `$FZF_CLICK_FOOTER_WORD` when the header or footer contains ANSI escape sequences and tab characters.
+- Fixed a bug where you cannot unset the default `--nth` using `change-nth` action.
+- Fixed a highlighting bug when using `--color fg:dim,nth:regular` pattern over ANSI-colored items.
+
+0.65.0
+------
+- Added `click-footer` event that is triggered when the footer section is clicked. When the event is triggered, the following environment variables are set:
+    - `$FZF_CLICK_FOOTER_COLUMN` - clicked column (1-based)
+    - `$FZF_CLICK_FOOTER_LINE` - clicked line (1-based)
+    - `$FZF_CLICK_FOOTER_WORD` - the word under the cursor
+  ```sh
+  fzf --footer $'[Edit] [View]\n[Copy to clipboard]' \
+      --with-shell 'bash -c' \
+      --bind 'click-footer:transform:
+        [[ $FZF_CLICK_FOOTER_WORD =~ Edit ]] && echo "execute:vim \{}"
+        [[ $FZF_CLICK_FOOTER_WORD =~ View ]] && echo "execute:view \{}"
+        (( FZF_CLICK_FOOTER_LINE == 2 )) && (( FZF_CLICK_FOOTER_COLUMN < 20 )) &&
+            echo "execute-silent(echo -n \{} | pbcopy)+bell"
+      '
+  ```
+- Added `trigger(...)` action that triggers events bound to another key or event.
+  ```sh
+  # You can click on each key name to trigger the actions bound to that key
+  fzf --footer 'Ctrl-E: Edit / Ctrl-V: View / Ctrl-Y: Copy to clipboard' \
+      --with-shell 'bash -c' \
+      --bind 'ctrl-e:execute:vim {}' \
+      --bind 'ctrl-v:execute:view {}' \
+      --bind 'ctrl-y:execute-silent(echo -n {} | pbcopy)+bell' \
+      --bind 'click-footer:transform:
+        [[ $FZF_CLICK_FOOTER_WORD =~ Ctrl ]] && echo "trigger(${FZF_CLICK_FOOTER_WORD%:})"
+      '
+  ```
+    - You can specify a series of keys and events
+      ```sh
+      fzf --bind 'a:up,b:trigger(a,a,a)'
+      ```
+- Added support for `{*n}` and `{*nf}` placeholder.
+    - `{*n}` evaluates to the zero-based ordinal index of all matched items.
+    - `{*nf}` evaluates to the temporary file containing that.
+- Bug fixes and improvements
+    - [neovim] Fixed margin background color when `&winborder` is used (#4453)
+    - Fixed rendering error when hiding a preview window without border (#4465)
+    - fix(shell): check for mawk existence before version check (#4468)
+        - Thanks to @LangLangBart and @akinomyoga
+    - Fixed `--no-header-lines-border` behavior (08027e7a)
+
+0.64.0
+------
+- Added `multi` event that is triggered when the multi-selection has changed.
+  ```sh
+  fzf --multi \
+      --bind 'ctrl-a:select-all,ctrl-d:deselect-all' \
+      --bind 'multi:transform-footer:(( FZF_SELECT_COUNT )) && echo "Selected $FZF_SELECT_COUNT item(s)"'
+  ```
+- [Halfwidth and fullwidth alphanumeric and punctuation characters](https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)) are now internally normalized to their ASCII equivalents to allow matching with ASCII queries.
+  ```sh
+  echo ＡＢＣ| fzf -q abc
+  ```
+- Renamed `clear-selection` action to `clear-multi` for consistency.
+    - `clear-selection` remains supported as an alias for backward compatibility.
+- Bug fixes
+    - Fixed a bug that could cause fzf to abort due to incorrect update ordering.
+    - Fixed a bug where some multi-selections were lost when using `exclude` or `change-nth`.
+
+0.63.0
+------
+_Release highlights: https://junegunn.github.io/fzf/releases/0.63.0/_
+
+- Added footer. The default border style for footer is `line`, which draws a single separator line.
+  ```sh
+  fzf --reverse --footer "fzf: friend zone forever"
+  ```
+  - Options
+      - `--footer[=STRING]`
+      - `--footer-border[=STYLE]`
+      - `--footer-label=LABEL`
+      - `--footer-label-pos=COL[:bottom]`
+  - Colors
+      - `footer`
+      - `footer-bg`
+      - `footer-border`
+      - `footer-label`
+  - Actions
+      - `change-footer`
+      - `transform-footer`
+      - `bg-transform-footer`
+      - `change-footer-label`
+      - `transform-footer-label`
+      - `bg-transform-footer-label`
+- `line` border style is now allowed for all types of border except for `--list-border`.
+  ```sh
+  fzf --height 50% --style full:line --preview 'cat {}' \
+      --bind 'focus:bg-transform-header(file {})+bg-transform-footer(wc {})'
+  ```
+- Added `{*}` placeholder flag that evaluates to all matched items.
+  ```bash
+  seq 10000 | fzf --preview "awk '{sum += \$1} END {print sum}' {*f}"
+  ```
+  - Use this with caution, as it can make fzf sluggish for large lists.
+- Added asynchronous transform actions with `bg-` prefix that run asynchronously in the background, along with `bg-cancel` action to cancel currently running `bg-transform` actions.
+  ```sh
+  # Implement popup that disappears after 1 second
+  #   * Use footer as the popup
+  #   * Use `bell` to ring the terminal bell
+  #   * Use `bg-transform-footer` to clear the footer after 1 second
+  #   * Use `bg-cancel` to cancel currently running background transform actions
+  fzf --multi --list-border \
+      --bind 'enter:execute-silent(echo -n {+} | pbcopy)+bell' \
+      --bind 'enter:+transform-footer(echo Copied {} to clipboard)' \
+      --bind 'enter:+bg-cancel+bg-transform-footer(sleep 1)'
+
+  # It's okay for the commands to take a little while because they run in the background
+  GETTER='curl -s http://metaphorpsum.com/sentences/1'
+  fzf --style full --border --preview : \
+      --bind "focus:bg-transform-header:$GETTER" \
+      --bind "focus:+bg-transform-footer:$GETTER" \
+      --bind "focus:+bg-transform-border-label:$GETTER" \
+      --bind "focus:+bg-transform-preview-label:$GETTER" \
+      --bind "focus:+bg-transform-input-label:$GETTER" \
+      --bind "focus:+bg-transform-list-label:$GETTER" \
+      --bind "focus:+bg-transform-header-label:$GETTER" \
+      --bind "focus:+bg-transform-footer-label:$GETTER" \
+      --bind "focus:+bg-transform-ghost:$GETTER" \
+      --bind "focus:+bg-transform-prompt:$GETTER"
+  ```
+- Added support for full-line background color in the list section
+  ```sh
+  for i in $(seq 16 255); do
+    echo -e "\x1b[48;5;${i}m\x1b[0Khello"
+  done | fzf --ansi
+  ```
+- SSH completion enhancements by @akinomyoga
+- Bug fixes and improvements
+
+0.62.0
+------
+- Relaxed the `--color` option syntax to allow whitespace-separated entries (in addition to commas), making multi-line definitions easier to write and read
+  ```sh
+  # seoul256-light
+  fzf --style full --color='
+    fg:#616161 fg+:#616161
+    bg:#ffffff bg+:#e9e9e9 alt-bg:#f1f1f1
+    hl:#719872 hl+:#719899
+    pointer:#e12672 marker:#e17899
+    header:#719872
+    spinner:#719899 info:#727100
+    prompt:#0099bd query:#616161
+    border:#e1e1e1
+  '
+  ```
+- Added `alt-bg` color to create striped lines to visually separate rows
+  ```sh
+  fzf --color bg:237,alt-bg:238,current-bg:236 --highlight-line
+
+  declare -f | perl -0777 -pe 's/^}\n/}\0/gm' |
+    bat --plain --language bash --color always |
+    fzf --read0 --ansi --reverse --multi \
+        --color bg:237,alt-bg:238,current-bg:236 --highlight-line
+  ```
+- [fish] Improvements in CTRL-R binding (@bitraid)
+    - You can trigger CTRL-R in the middle of a command to insert the selected item
+    - You can delete history items with SHIFT-DEL
+- Bug fixes and improvements
+    - Fixed unnecessary 100ms delay after `reload` (#4364)
+    - Fixed `selected-bg` not applied to colored items (#4372)
+
+0.61.3
+------
+- Reverted #4351 as it caused `tmux run-shell 'fzf --tmux'` to fail (#4559 #4560)
+- More environment variables for child processes (#4356)
+
+0.61.2
+------
+- Fixed panic when using header border without pointer/marker (@phanen)
+- Fixed `--tmux` option when already inside a tmux popup (@peikk0)
+- Bug fixes and improvements in CTRL-T binding of fish (#4334) (@bitraid)
+- Added `--no-tty-default` option to make fzf search for the current TTY device instead of defaulting to `/dev/tty` (#4242)
+
+0.61.1
+------
+- Disable bracketed-paste mode on exit. This fixes issue where pasting breaks after running fzf on old bash versions that don't support the mode.
+
+0.61.0
+------
+- Added `--ghost=TEXT` to display a ghost text when the input is empty
+  ```sh
+  # Display "Type to search" when the input is empty
+  fzf --ghost "Type to search"
+  ```
+- Added `change-ghost` and `transform-ghost` actions for dynamically changing the ghost text
+- Added `change-pointer` and `transform-pointer` actions for dynamically changing the pointer sign
+- Added `r` flag for placeholder expression (raw mode) for unquoted output
+- Bug fixes and improvements
+
+0.60.3
+------
+- Bug fixes and improvements
+    - [fish] Enable multiple history commands insertion (#4280) (@bitraid)
+    - [walker] Append '/' to directory entries on MSYS2 (#4281)
+    - Trim trailing whitespaces after processing ANSI sequences (#4282)
+    - Remove temp files before `become` when using `--tmux` option (#4283)
+    - Fix condition for using item numlines cache (#4285) (@alex-huff)
+    - Make `--accept-nth` compatible with `--select-1` (#4287)
+    - Increase the query length limit from 300 to 1000 (#4292)
+    - [windows] Prevent fzf from consuming user input while paused (#4260)
+
+0.60.2
+------
+- Template for `--with-nth` and `--accept-nth` now supports `{n}` which evaluates to the zero-based ordinal index of the item
+- Fixed a regression that caused the last field in the "nth" expression to be trimmed when a regular expression delimiter is used
+    - Thanks to @phanen for the fix
+- Fixed 'jump' action when the pointer is an empty string
+
+0.60.1
+------
+- Bug fixes and minor improvements
+    - Built-in walker now prints directory entries with a trailing slash
+    - Fixed a bug causing unexpected behavior with [fzf-tab](https://github.com/Aloxaf/fzf-tab). Please upgrade if you use it.
+- Thanks to @alexeisersun, @bitraid, @Lompik, and @fsc0 for the contributions
+
+0.60.0
+------
+_Release highlights: https://junegunn.github.io/fzf/releases/0.60.0/_
+
+- Added `--accept-nth` for choosing output fields
+  ```sh
+  ps -ef | fzf --multi --header-lines 1 | awk '{print $2}'
+  # Becomes
+  ps -ef | fzf --multi --header-lines 1 --accept-nth 2
+
+  git branch | fzf | cut -c3-
+  # Can be rewritten as
+  git branch | fzf --accept-nth -1
+  ```
+- `--accept-nth` and `--with-nth` now support a template that includes multiple field index expressions in curly braces
+  ```sh
+  echo foo,bar,baz | fzf --delimiter , --accept-nth '{1}, {3}, {2}'
+    # foo, baz, bar
+
+  echo foo,bar,baz | fzf --delimiter , --with-nth '{1},{3},{2},{1..2}'
+    # foo,baz,bar,foo,bar
+  ```
+- Added `exclude` and `exclude-multi` actions for dynamically excluding items
+  ```sh
+  seq 100 | fzf --bind 'ctrl-x:exclude'
+
+  # 'exclude-multi' will exclude the selected items or the current item
+  seq 100 | fzf --multi --bind 'ctrl-x:exclude-multi'
+  ```
+- Preview window now prints wrap indicator when wrapping is enabled
+  ```sh
+  seq 100 | xargs | fzf --wrap --preview 'echo {}' --preview-window wrap
+  ```
+- Bug fixes and improvements
+
+0.59.0
+------
+_Release highlights: https://junegunn.github.io/fzf/releases/0.59.0/_
+
+- Prioritizing file name matches (#4192)
+    - Added a new tiebreak option `pathname` for prioritizing file name matches
+    - `--scheme=path` now sets `--tiebreak=pathname,length`
+    - fzf will automatically choose `path` scheme
+        * when the input is a TTY device, where fzf would start its built-in walker or run `$FZF_DEFAULT_COMMAND` which is usually a command for listing files,
+        * but not when `reload` or `transform` action is bound to `start` event, because in that case, fzf can't be sure of the input type.
+- Added `--header-lines-border` to display header from `--header-lines` with a separate border
+  ```sh
+  # Use --header-lines-border to separate two headers
+  ps -ef | fzf --style full --layout reverse --header-lines 1 \
+               --bind 'ctrl-r:reload(ps -ef)' --header 'Press CTRL-R to reload' \
+               --header-lines-border bottom --no-list-border
+  ```
+- `click-header` event now sets `$FZF_CLICK_HEADER_WORD` and `$FZF_CLICK_HEADER_NTH`. You can use them to implement a clickable header for changing the search scope using the new `transform-nth` action.
+  ```sh
+  # Click on the header line to limit search scope
+  ps -ef | fzf --style full --layout reverse --header-lines 1 \
+               --header-lines-border bottom --no-list-border \
+               --color fg:dim,nth:regular \
+               --bind 'click-header:transform-nth(
+                         echo $FZF_CLICK_HEADER_NTH
+                       )+transform-prompt(
+                         echo "$FZF_CLICK_HEADER_WORD> "
+                       )'
+  ```
+    - `$FZF_KEY` was updated to expose the type of the click. e.g. `click`, `ctrl-click`, etc. You can use it to implement a more sophisticated behavior.
+    - `kill` completion for bash and zsh were updated to use this feature
+- Added `--no-input` option to completely disable and hide the input section
+  ```sh
+  # Click header to trigger search
+  fzf --header '[src] [test]' --no-input --layout reverse \
+      --header-border bottom --input-border \
+      --bind 'click-header:transform-search:echo ${FZF_CLICK_HEADER_WORD:1:-1}'
+
+  # Vim-like mode switch
+  fzf --layout reverse-list --no-input \
+      --bind 'j:down,k:up,/:show-input+unbind(j,k,/)' \
+      --bind 'enter,esc,ctrl-c:transform:
+        if [[ $FZF_INPUT_STATE = enabled ]]; then
+          echo "rebind(j,k,/)+hide-input"
+        elif [[ $FZF_KEY = enter ]]; then
+          echo accept
+        else
+          echo abort
+        fi
+      '
+  ```
+    - You can later show the input section using `show-input` or `toggle-input` action, and hide it again using `hide-input`, or `toggle-input`.
+- Extended `{q}` placeholder to support ranges. e.g. `{q:1}`, `{q:2..}`, etc.
+- Added `search(...)` and `transform-search(...)` action to trigger an fzf search with an arbitrary query string. This can be used to extend the search syntax of fzf. In the following example, fzf will use the first word of the query to trigger ripgrep search, and use the rest of the query to perform fzf search within the result.
+  ```sh
+  export TEMP=$(mktemp -u)
+  trap 'rm -f "$TEMP"' EXIT
+
+  TRANSFORMER='
+    rg_pat={q:1}      # The first word is passed to ripgrep
+    fzf_pat={q:2..}   # The rest are passed to fzf
+
+    if ! [[ -r "$TEMP" ]] || [[ $rg_pat != $(cat "$TEMP") ]]; then
+      echo "$rg_pat" > "$TEMP"
+      printf "reload:sleep 0.1; rg --column --line-number --no-heading --color=always --smart-case %q || true" "$rg_pat"
+    fi
+    echo "+search:$fzf_pat"
+  '
+  fzf --ansi --disabled \
+    --with-shell 'bash -c' \
+    --bind "start,change:transform:$TRANSFORMER"
+  ```
+- You can now bind actions to multiple keys and events at once by writing a comma-separated list of keys and events before the colon
+  ```sh
+  # Load 'ps -ef' output on start and reload it on CTRL-R
+  fzf --bind 'start,ctrl-r:reload:ps -ef'
+  ```
+- `--min-height` option now takes a number followed by `+`, which tells fzf to show at least that many items in the list section. The default value is now changed to `10+`.
+  ```sh
+  # You will only see the input section which takes 3 lines
+  fzf --style=full --height 1% --min-height 3
+
+  # You will see 3 items in the list section
+  fzf --style full --height 1% --min-height 3+
+  ```
+    - Shell integration scripts were updated to use `--min-height 20+` by default
+- `--header-lines` will be displayed at the top in `reverse-list` layout
+- Added `bell` action to ring the terminal bell
+  ```sh
+  # Press CTRL-Y to copy the current line to the clipboard and ring the bell
+  fzf --bind 'ctrl-y:execute-silent(echo -n {} | pbcopy)+bell'
+  ```
+- Added `toggle-bind` action
+- Bug fixes and improvements
+- Fixed fish script to support fish 3.1.2 or later (@bitraid)
+
+0.58.0
+------
+_Release highlights: https://junegunn.github.io/fzf/releases/0.58.0/_
+
+This version introduces three new border types, `--list-border`, `--input-border`, and `--header-border`, offering much greater flexibility for customizing the user interface.
+
+<img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-4-borders.png" />
+
+Also, fzf now offers "style presets" for quick customization, which can be activated using the `--style` option.
+
+| Preset    | Screenshot                                                                             |
+| :---      | :---                                                                                   |
+| `default` | <img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-style-default.png"/> |
+| `full`    | <img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-style-full.png"/>    |
+| `minimal` | <img src="https://raw.githubusercontent.com/junegunn/i/master/fzf-style-minimal.png"/> |
+
+- Style presets (#4160)
+    - `--style=full[:BORDER_STYLE]`
+    - `--style=default`
+    - `--style=minimal`
+- Border and label for the list section (#4148)
+    - Options
+        - `--list-border[=STYLE]`
+        - `--list-label=LABEL`
+        - `--list-label-pos=COL[:bottom]`
+    - Colors
+        - `list-fg`
+        - `list-bg`
+        - `list-border`
+        - `list-label`
+    - Actions
+        - `change-list-label`
+        - `transform-list-label`
+- Border and label for the input section (prompt line and info line) (#4154)
+    - Options
+        - `--input-border[=STYLE]`
+        - `--input-label=LABEL`
+        - `--input-label-pos=COL[:bottom]`
+    - Colors
+        - `input-fg` (`query`)
+        - `input-bg`
+        - `input-border`
+        - `input-label`
+    - Actions
+        - `change-input-label`
+        - `transform-input-label`
+- Border and label for the header section (#4159)
+    - Options
+        - `--header-border[=STYLE]`
+        - `--header-label=LABEL`
+        - `--header-label-pos=COL[:bottom]`
+    - Colors
+        - `header-fg` (`header`)
+        - `header-bg`
+        - `header-border`
+        - `header-label`
+    - Actions
+        - `change-header-label`
+        - `transform-header-label`
+- Added `--preview-border[=STYLE]` as short for `--preview-window=border[-STYLE]`
+- Added new preview border style `line` which draws a single separator line between the preview window and the rest of the interface
+- fzf will now render a dashed line (`┈┈`) in each `--gap` for better visual separation.
+  ```sh
+  # All bash/zsh functions, highlighted
+  declare -f |
+    perl -0 -pe 's/^}\n/}\0/gm' |
+    bat --plain --language bash --color always |
+    fzf --read0 --ansi --layout reverse --multi --highlight-line --gap
+  ```
+    * You can customize the line using `--gap-line[=STR]`.
+- You can specify `border-native` to `--tmux` so that native tmux border is used instead of `--border`. This can be useful if you start a different program from inside the popup.
+  ```sh
+  fzf --tmux border-native --bind 'enter:execute:less {}'
+  ```
+- Added `toggle-multi-line` action
+- Added `toggle-hscroll` action
+- Added `change-nth` action for dynamically changing the value of the `--nth` option
+  ```sh
+  # Start with --nth 1, then 2, then 3, then back to the default, 1
+  echo 'foo foobar foobarbaz' | fzf --bind 'space:change-nth(2|3|)' --nth 1 -q foo
+  ```
+- `--nth` parts of each line can now be rendered in a different text style
+  ```sh
+  # nth in a different style
+  ls -al | fzf --nth -1 --color nth:italic
+  ls -al | fzf --nth -1 --color nth:reverse
+  ls -al | fzf --nth -1 --color nth:reverse:bold
+
+  # Dim the other parts
+  ls -al | fzf --nth -1 --color nth:regular,fg:dim
+
+  # With 'change-nth'. The current nth option is exported as $FZF_NTH.
+  ps -ef | fzf --reverse --header-lines 1 --header-border bottom --input-border \
+             --color nth:regular,fg:dim \
+             --bind 'ctrl-n:change-nth(8..|1|2|3|4|5|6|7|)' \
+             --bind 'result:transform-prompt:echo "${FZF_NTH}> "'
+  ```
+- A single-character delimiter is now treated as a plain string delimiter rather than a regular expression delimiter, even if it's a regular expression meta-character.
+    - This means you can just write `--delimiter '|'` instead of escaping it as `--delimiter '\|'`
+- Bug fixes
+- Bug fixes and improvements in fish scripts (thanks to @bitraid)
+
+0.57.0
+------
+- You can now resize the preview window by dragging the border
+- Built-in walker improvements
+    - `--walker-root` can take multiple directory arguments. e.g. `--walker-root include src lib`
+    - `--walker-skip` can handle multi-component patterns. e.g. `--walker-skip target/build`
+- Removed long processing delay when displaying images in the preview window
+- `FZF_PREVIEW_*` environment variables are exported to all child processes (#4098)
+- Bug fixes in fish scripts
+
+0.56.3
+------
+- Bug fixes in zsh scripts
+    - fix(zsh): handle backtick trigger edge case (#4090)
+    - revert(zsh): remove 'fc -RI' call in the history widget (#4093)
+    - Thanks to @LangLangBart for the contributions
+
+0.56.2
+------
+- Bug fixes
+    - Fixed abnormal scrolling behavior when `--wrap` is set (#4083)
+    - [zsh] Fixed warning message when `ksh_arrays` is set (#4084)
+
+0.56.1
+------
+- Bug fixes and improvements
+    - Fixed a race condition which would cause fzf to present stale results after `reload` (#4070)
+    - `page-up` and `page-down` actions now work correctly with multi-line items (#4069)
+    - `{n}` is allowed in `SCROLL` expression in `--preview-window` (#4079)
+    - [zsh] Fixed regression in history loading with shared option (#4071)
+    - [zsh] Better command extraction in zsh completion (#4082)
+- Thanks to @LangLangBart, @jaydee-coder, @alex-huff, and @vejkse for the contributions
+
+0.56.0
+------
+- Added `--gap[=N]` option to display empty lines between items.
+    - This can be useful to visually separate adjacent multi-line items.
+      ```sh
+      # All bash functions, highlighted
+      declare -f | perl -0777 -pe 's/^}\n/}\0/gm' |
+        bat --plain --language bash --color always |
+        fzf --read0 --ansi --reverse --multi --highlight-line --gap
+      ```
+    - Or just to make the list easier to read. For single-line items, you probably want to set `--color gutter:-1` as well to hide the gutter.
+      ```sh
+      fzf --info inline-right --gap --color gutter:-1
+      ```
+- Added `noinfo` option to `--preview-window` to hide the scroll indicator in the preview window
+- Bug fixes
+    - Thanks to @LangLangBart, @akinomyoga, and @charlievieth for fixing the bugs
+
+0.55.0
+------
+_Release highlights: https://junegunn.github.io/fzf/releases/0.55.0/_
+
+- Added `exact-boundary-match` type to the search syntax. When a search term is single-quoted, fzf will search for the exact occurrences of the string with both ends at word boundaries.
+  ```sh
+  fzf --query "'here'" << EOF
+  come here
+  not there
+  EOF
+  ```
+- [bash] Fuzzy path completion is enabled for all commands
+    - 1. If the default completion is not already set
+    - 2. And if the current bash supports `complete -D` option
+    - However, fuzzy completion for some commands can be "dynamically" disabled by the dynamic completion loader
+    - See the comment in `__fzf_default_completion` function for more information
+- Comments are now allowed in `$FZF_DEFAULT_OPTS` and `$FZF_DEFAULT_OPTS_FILE`
+  ```sh
+  export FZF_DEFAULT_OPTS='
+    # Layout options
+    --layout=reverse
+    --info=inline-right   # Show info on the right side of the prompt line
+    # ...
+  '
+  ```
+- Hyperlinks (OSC 8) are now supported in the preview window and in the main window
+  ```sh
+  printf '<< \e]8;;http://github.com/junegunn/fzf\e\\Link to \e[32mfz\e[0mf\e]8;;\e\\ >>' | fzf --ansi
+
+  fzf --preview "printf '<< \e]8;;http://github.com/junegunn/fzf\e\\Link to \e[32mfz\e[0mf\e]8;;\e\\ >>'"
+  ```
+- The default `--ellipsis` is now `··` instead of `..`.
+- [vim] A spec can have `exit` callback that is called with the exit status of fzf
+    - This can be used to clean up temporary resources or restore the original state when fzf is closed without a selection
+- Fixed `--tmux bottom` when the status line is not at the bottom
+- Fixed extra scroll offset in multi-line mode (`--read0` or `--wrap`)
+- Added fallback `ps` command for `kill` completion on Cygwin
+
+0.54.3
+------
+- Fixed incompatibility of adaptive height specification and 'start:reload'
+  ```sh
+  # A regression in 0.54.0 would cause this to fail
+  fzf --height '~100%' --bind 'start:reload:seq 10'
+  ```
+- Environment variables are now available to `$FZF_DEFAULT_COMMAND`
+  ```sh
+  FZF_DEFAULT_COMMAND='echo $FZF_QUERY' fzf --query foo
+  ```
+
+0.54.2
+------
+- Fixed incorrect syntax highlighting of truncated multi-line entries
+- Updated GoReleaser to 2.1.0 to simplify notarization of macOS binaries
+    - macOS archives will be in `tar.gz` format instead of `zip` format since we no longer notarize the zip files but binaries
+- (Windows) Reverted a mintty fix in 0.54.0
+    - As a result, mouse may not work on mintty in fullscreen mode. However, fzf will correctly read non-ASCII input in fullscreen mode (`--no-height`).
+    - fzf unfortunately cannot read non-ASCII input when not in fullscreen mode on Windows. So if you need to input non-ASCII characters, add `--no-height` to your `$FZF_DEFAULT_OPTS`.
+    - Any help in fixing this issue will be appreciated (#3799, #3847).
+
+0.54.1
+------
+- Updated [fastwalk](https://github.com/charlievieth/fastwalk) dependency for built-in directory walker
+    - [fastwalk: add optional sorting and improve documentation](https://github.com/charlievieth/fastwalk/pull/27)
+    - [fastwalk: only check if MSYSTEM is set during MSYS/MSYS2](https://github.com/charlievieth/fastwalk/pull/28)
+    - Thanks to @charlievieth
+- Reverted ALT-C binding of fish to use `cd` instead of `builtin cd`
+    - `builtin cd` was introduced to work around a bug of `cd` coming from `zoxide init --cmd cd fish` where it cannot handle `--` argument.
+    - However, the default `cd` of fish is actually a wrapper function for supporting `cd -`, so we want to use it instead.
+    - See [#3928](https://github.com/junegunn/fzf/pull/3928) for more information and consider helping zoxide fix the bug.
+
+0.54.0
+------
+_Release highlights: https://junegunn.github.io/fzf/releases/0.54.0/_
+
+- Implemented line wrap of long items
+    - `--wrap` option enables line wrap
+    - `--wrap-sign` customizes the sign for wrapped lines (default: `↳ `)
+    - `toggle-wrap` action toggles line wrap
+      ```sh
+      history | fzf --tac --wrap --bind 'ctrl-/:toggle-wrap' --wrap-sign $'\t↳ '
+      ```
+    - fzf by default binds `CTRL-/` and `ALT-/` to `toggle-wrap`
+- Updated shell integration scripts to leverage line wrap
+    - CTRL-R binding includes `--wrap-sign $'\t↳ '` to indent wrapped lines
+    - `kill **` completion uses `--wrap` to show the whole line by default
+      instead of showing it in the preview window
+- Added `--info-command` option for customizing the info line
+  ```sh
+  # Prepend the current cursor position in yellow
+  fzf --info-command='echo -e "\x1b[33;1m$FZF_POS\x1b[m/$FZF_INFO 💛"'
+  ```
+    - `$FZF_INFO` is set to the original info text
+    - ANSI color codes are supported
+- Pointer and marker signs can be set to empty strings
+  ```sh
+  # Minimal style
+  fzf --pointer '' --marker '' --prompt '' --info hidden
+  ```
+- Better cache management and improved rendering for `--tail`
+- Improved `--sync` behavior
+    - When `--sync` is provided, fzf will not render the interface until the initial filtering and the associated actions (bound to any of `start`, `load`, `result`, or `focus`) are complete.
+      ```sh
+      # fzf will not render intermediate states
+      (sleep 1; seq 1000000; sleep 1) |
+        fzf --sync --query 5 --listen --bind start:up,load:up,result:up,focus:change-header:Ready
+      ```
+- GET endpoint is now available from `execute` and `transform` actions (it used to timeout due to lock conflict)
+  ```sh
+  fzf --listen --sync --bind 'focus:transform-header:curl -s localhost:$FZF_PORT?limit=0 | jq .'
+  ```
+- Added `offset-middle` action to place the current item is in the middle of the screen
+- fzf will not start the initial reader when `reload` or `reload-sync` is bound to `start` event. `fzf < /dev/null` or `: | fzf` are no longer required and extraneous `load` event will not fire due to the empty list.
+  ```sh
+  # Now this will work as expected. Previously, this would print an invalid header line.
+  # `fzf < /dev/null` or `: | fzf` would fix the problem, but then an extraneous
+  # `load` event would fire and the header would be prematurely updated.
+  fzf --header 'Loading ...' --header-lines 1 \
+      --bind 'start:reload:sleep 1; ps -ef' \
+      --bind 'load:change-header:Loaded!'
+  ```
+- Fixed mouse support on Windows
+- Fixed crash when using `--tiebreak=end` with very long items
+- zsh 5.0 compatibility (thanks to @LangLangBart)
+- Fixed `--walker-skip` to also skip symlinks to directories
+- Fixed `result` event not fired when input stream is not complete
+- New tags will have `v` prefix so that they are available on https://proxy.golang.org/
+
+0.53.0
+------
+_Release highlights: https://junegunn.github.io/fzf/releases/0.53.0/_
+
+- Multi-line display
+    - See [Processing multi-line items](https://junegunn.github.io/fzf/tips/processing-multi-line-items/)
+    - fzf can now display multi-line items
+      ```sh
+      # All bash functions, highlighted
+      declare -f | perl -0777 -pe 's/^}\n/}\0/gm' |
+        bat --plain --language bash --color always |
+        fzf --read0 --ansi --reverse --multi --highlight-line
+
+      # Ripgrep multi-line output
+      rg --pretty bash | perl -0777 -pe 's/\n\n/\n\0/gm' |
+        fzf --read0 --ansi --multi --highlight-line --reverse --tmux 70%
+      ```
+        - To disable multi-line display, use `--no-multi-line`
+    - CTRL-R bindings of bash, zsh, and fish have been updated to leverage multi-line display
+    - The default `--pointer` and `--marker` have been changed from `>` to Unicode bar characters as they look better with multi-line items
+    - Added `--marker-multi-line` to customize the select marker for multi-line entries with the default set to `╻┃╹`
+      ```
+      ╻First line
+      ┃...
+      ╹Last line
+      ```
+- Native tmux integration
+    - Added `--tmux` option to replace fzf-tmux script and simplify distribution
+      ```sh
+      # --tmux [center|top|bottom|left|right][,SIZE[%]][,SIZE[%]]
+      # Center, 100% width and 70% height
+      fzf --tmux 100%,70% --border horizontal --padding 1,2
+
+      # Left, 30% width
+      fzf --tmux left,30%
+
+      # Bottom, 50% height
+      fzf --tmux bottom,50%
+      ```
+        - To keep the implementation simple, it only uses popups. You need tmux 3.3 or later.
+    - To use `--tmux` in Vim plugin:
+      ```vim
+      let g:fzf_layout = { 'tmux': '100%,70%' }
+      ```
+- Added support for endless input streams
+    - See [Browsing log stream with fzf](https://junegunn.github.io/fzf/tips/browsing-log-streams/)
+    - Added `--tail=NUM` option to limit the number of items to keep in memory. This is useful when you want to browse an endless stream of data (e.g. log stream) with fzf while limiting memory usage.
+      ```sh
+      # Interactive filtering of a log stream
+      tail -f *.log | fzf --tail 100000 --tac --no-sort --exact
+      ```
+- Better Windows Support
+    - fzf now works on Git bash (mintty) out of the box via winpty integration
+    - Many fixes and improvements for Windows
+- man page is now embedded in the binary; `fzf --man` to see it
+- Changed the default `--scroll-off` to 3, as we think it's a better default
+- Process started by `execute` action now directly writes to and reads from `/dev/tty`. Manual `/dev/tty` redirection for interactive programs is no longer required.
+  ```sh
+  # Vim will work fine without /dev/tty redirection
+  ls | fzf --bind 'space:execute:vim {}' > selected
+  ```
+- Added `print(...)` action to queue an arbitrary string to be printed on exit. This was mainly added to work around the limitation of `--expect` where it's not compatible with `--bind` on the same key and it would ignore other actions bound to it.
+  ```sh
+  # This doesn't work as expected because --expect is not compatible with --bind
+  fzf --multi --expect ctrl-y --bind 'ctrl-y:select-all'
+
+  # This is something you can do instead
+  fzf --multi --bind 'enter:print()+accept,ctrl-y:select-all+print(ctrl-y)+accept'
+  ```
+    - We also considered making them compatible, but realized that some users may have been relying on the current behavior.
+- [`NO_COLOR`](https://no-color.org/) environment variable is now respected. If the variable is set, fzf defaults to `--no-color` unless otherwise specified.
+
+0.52.1
+------
+- Fixed a critical bug in the Windows version
+    - Windows users are strongly encouraged to upgrade to this version
+
 0.52.0
 ------
 - Added `--highlight-line` to highlight the whole current line (à la `set cursorline` of Vim)

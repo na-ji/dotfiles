@@ -16,7 +16,21 @@ type MatchRequest struct {
 	pattern  *Pattern
 	final    bool
 	sort     bool
-	revision int
+	revision revision
+}
+
+type MatchResult struct {
+	merger     *Merger
+	passMerger *Merger
+	cancelled  bool
+}
+
+func (mr MatchResult) cacheable() bool {
+	return mr.merger != nil && mr.merger.cacheable()
+}
+
+func (mr MatchResult) final() bool {
+	return mr.merger != nil && mr.merger.final
 }
 
 // Matcher is responsible for performing search
@@ -29,8 +43,8 @@ type Matcher struct {
 	reqBox         *util.EventBox
 	partitions     int
 	slab           []*util.Slab
-	mergerCache    map[string]*Merger
-	revision       int
+	mergerCache    map[string]MatchResult
+	revision       revision
 }
 
 const (
@@ -40,7 +54,7 @@ const (
 
 // NewMatcher returns a new Matcher
 func NewMatcher(cache *ChunkCache, patternBuilder func([]rune) *Pattern,
-	sort bool, tac bool, eventBox *util.EventBox, revision int) *Matcher {
+	sort bool, tac bool, eventBox *util.EventBox, revision revision) *Matcher {
 	partitions := util.Min(numPartitionsMultiplier*runtime.NumCPU(), maxPartitions)
 	return &Matcher{
 		cache:          cache,
@@ -51,7 +65,7 @@ func NewMatcher(cache *ChunkCache, patternBuilder func([]rune) *Pattern,
 		reqBox:         util.NewEventBox(),
 		partitions:     partitions,
 		slab:           make([]*util.Slab, partitions),
-		mergerCache:    make(map[string]*Merger),
+		mergerCache:    make(map[string]MatchResult),
 		revision:       revision}
 }
 
@@ -82,42 +96,45 @@ func (m *Matcher) Loop() {
 			break
 		}
 
+		cacheCleared := false
 		if request.sort != m.sort || request.revision != m.revision {
 			m.sort = request.sort
+			m.mergerCache = make(map[string]MatchResult)
+			if !request.revision.compatible(m.revision) {
+				m.cache.Clear()
+			}
 			m.revision = request.revision
-			m.mergerCache = make(map[string]*Merger)
-			m.cache.Clear()
+			cacheCleared = true
 		}
 
 		// Restart search
 		patternString := request.pattern.AsString()
-		var merger *Merger
-		cancelled := false
+		var result MatchResult
 		count := CountItems(request.chunks)
 
-		foundCache := false
-		if count == prevCount {
-			// Look up mergerCache
-			if cached, found := m.mergerCache[patternString]; found {
-				foundCache = true
-				merger = cached
+		if !cacheCleared {
+			if count == prevCount {
+				// Look up mergerCache
+				if cached, found := m.mergerCache[patternString]; found && cached.final() == request.final {
+					result = cached
+				}
+			} else {
+				// Invalidate mergerCache
+				prevCount = count
+				m.mergerCache = make(map[string]MatchResult)
 			}
-		} else {
-			// Invalidate mergerCache
-			prevCount = count
-			m.mergerCache = make(map[string]*Merger)
 		}
 
-		if !foundCache {
-			merger, cancelled = m.scan(request)
+		if result.merger == nil {
+			result = m.scan(request)
 		}
 
-		if !cancelled {
-			if merger.cacheable() {
-				m.mergerCache[patternString] = merger
+		if !result.cancelled {
+			if result.cacheable() {
+				m.mergerCache[patternString] = result
 			}
-			merger.final = request.final
-			m.eventBox.Set(EvtSearchFin, merger)
+			result.merger.final = request.final
+			m.eventBox.Set(EvtSearchFin, result)
 		}
 	}
 }
@@ -148,18 +165,22 @@ type partialResult struct {
 	matches []Result
 }
 
-func (m *Matcher) scan(request MatchRequest) (*Merger, bool) {
+func (m *Matcher) scan(request MatchRequest) MatchResult {
 	startedAt := time.Now()
 
 	numChunks := len(request.chunks)
 	if numChunks == 0 {
-		return EmptyMerger(request.revision), false
+		m := EmptyMerger(request.revision)
+		return MatchResult{m, m, false}
 	}
 	pattern := request.pattern
+	passMerger := PassMerger(&request.chunks, m.tac, request.revision)
 	if pattern.IsEmpty() {
-		return PassMerger(&request.chunks, m.tac, request.revision), false
+		return MatchResult{passMerger, passMerger, false}
 	}
 
+	minIndex := request.chunks[0].items[0].Index()
+	maxIndex := request.chunks[numChunks-1].lastIndex(minIndex)
 	cancelled := util.NewAtomicBool(false)
 
 	slices := m.sliceChunks(request.chunks)
@@ -190,7 +211,7 @@ func (m *Matcher) scan(request MatchRequest) (*Merger, bool) {
 			for _, matches := range allMatches {
 				sliceMatches = append(sliceMatches, matches...)
 			}
-			if m.sort {
+			if m.sort && request.pattern.sortable {
 				if m.tac {
 					sort.Sort(ByRelevanceTac(sliceMatches))
 				} else {
@@ -218,7 +239,7 @@ func (m *Matcher) scan(request MatchRequest) (*Merger, bool) {
 		}
 
 		if m.reqBox.Peek(reqReset) {
-			return nil, wait()
+			return MatchResult{nil, nil, wait()}
 		}
 
 		if time.Since(startedAt) > progressMinDuration {
@@ -231,11 +252,12 @@ func (m *Matcher) scan(request MatchRequest) (*Merger, bool) {
 		partialResult := <-resultChan
 		partialResults[partialResult.index] = partialResult.matches
 	}
-	return NewMerger(pattern, partialResults, m.sort, m.tac, request.revision), false
+	merger := NewMerger(pattern, partialResults, m.sort && request.pattern.sortable, m.tac, request.revision, minIndex, maxIndex)
+	return MatchResult{merger, passMerger, false}
 }
 
 // Reset is called to interrupt/signal the ongoing search
-func (m *Matcher) Reset(chunks []*Chunk, patternRunes []rune, cancel bool, final bool, sort bool, revision int) {
+func (m *Matcher) Reset(chunks []*Chunk, patternRunes []rune, cancel bool, final bool, sort bool, revision revision) {
 	pattern := m.patternBuilder(patternRunes)
 
 	var event util.EventType
@@ -244,7 +266,7 @@ func (m *Matcher) Reset(chunks []*Chunk, patternRunes []rune, cancel bool, final
 	} else {
 		event = reqRetry
 	}
-	m.reqBox.Set(event, MatchRequest{chunks, pattern, final, sort && pattern.sortable, revision})
+	m.reqBox.Set(event, MatchRequest{chunks, pattern, final, sort, revision})
 }
 
 func (m *Matcher) Stop() {

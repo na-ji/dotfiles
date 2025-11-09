@@ -26,8 +26,12 @@ const (
 	previewCancelWait = 500 * time.Millisecond
 	previewChunkDelay = 100 * time.Millisecond
 	previewDelayed    = 500 * time.Millisecond
-	maxPatternLength  = 300
+	maxPatternLength  = 1000
 	maxMulti          = math.MaxInt32
+
+	// Background processes
+	maxBgProcesses          = 30
+	maxBgProcessesPerAction = 3
 
 	// Matcher
 	numPartitionsMultiplier = 8
@@ -67,9 +71,9 @@ const (
 )
 
 const (
-	ExitCancel    = -1
 	ExitOk        = 0
 	ExitNoMatch   = 1
 	ExitError     = 2
+	ExitBecome    = 126
 	ExitInterrupt = 130
 )
