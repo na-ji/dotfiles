@@ -48,8 +48,8 @@ curl -fsSL https://bun.sh/install | bash
 # https://starship.rs/
 curl -fsSL https://starship.rs/install.sh | FORCE=1 sh
 
-# https://github.com/pyenv/pyenv
-curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
+# https://github.com/astral-sh/uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 {{ if stat (joinPath .chezmoi.homeDir ".pyenv") }}
 # https://github.com/nvbn/thefuck
